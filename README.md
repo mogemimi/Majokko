@@ -64,11 +64,11 @@ xcodebuild -project build.xcodefiles/Build/app.xcodeproj
 To build in release mode, use `-configuration` option:
 
 ```bash
-xcodebuild -project build.xcodefiles/build/MajokkoApp.xcodeproj -configuration Release
+xcodebuild -project build.xcodefiles/Build/app.xcodeproj -configuration Release
 ```
 
 **3. Running app**
 
 ```bash
-open Build/build/Release/MajokkoApp.app
+open Build/build/Release/Majokko.app
 ```

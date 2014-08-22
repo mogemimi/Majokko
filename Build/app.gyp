@@ -72,7 +72,7 @@
   'targets': [
     {
       'target_name': 'Majokko',
-      'product_name': 'MajokkoApp',
+      'product_name': 'Majokko',
       'type': 'executable',
       'mac_bundle': 1,
       'sources': [
