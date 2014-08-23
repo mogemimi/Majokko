@@ -22,14 +22,14 @@ using namespace Pomdog;
 
 class MajokkoGame: public Game {
 public:
-	explicit MajokkoGame(std::shared_ptr<GameHost> host);
+	explicit MajokkoGame(std::shared_ptr<GameHost> const& gameHost);
 
-	void Initialize();
+	void Initialize() override;
 
-	void Update();
+	void Update() override;
 
-	void Draw();
-
+	void Draw() override;
+	
 private:
 	std::shared_ptr<GameHost> gameHost;
 	std::shared_ptr<GraphicsContext> graphicsContext;
