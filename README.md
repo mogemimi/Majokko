@@ -17,7 +17,7 @@ First, install GYP from https://chromium.googlesource.com/external/.
 Make sure git is installed.
 From the root of your engine directory, run:  
 ```bash
-git clone https://chromium.googlesource.com/external/gyp.git tools/gyp
+git clone https://chromium.googlesource.com/external/gyp.git Tools/gyp
 ```
 
 Second, run setup.py.
@@ -27,7 +27,7 @@ Second, run setup.py.
 To install globally with gyp:
 
 ```bash
-cd tools/gyp
+cd Tools/gyp
 [sudo] python setup.py install
 ```
 
@@ -36,7 +36,7 @@ cd tools/gyp
 On Windows systems you can do:
 
 ```bash
-cd tools/gyp
+cd Tools/gyp
 python setup.py install
 ```
 
@@ -47,7 +47,6 @@ cd Majokko
 git clone https://github.com/mogemimi/pomdog.git pomdog
 cd pomdog
 git checkout -b gamedev origin/gamedev
-cd ..
 ```
 
 ### Building under Mac OS X and Xcode
