@@ -13,7 +13,8 @@
 #	pragma once
 #endif
 
-#include "Pomdog2D.hpp"
+#include "RenderLayer.hpp"
+#include "Pomdog.Experimental/Pomdog2D.hpp"
 #include <Pomdog/Pomdog.hpp>
 
 namespace Majokko {
@@ -29,21 +30,14 @@ public:
 	void Update() override;
 
 	void Draw() override;
-	
-private:
-	void DrawScene(Transform2D const& transform, Camera2D const& camera);
-	
+		
 private:
 	std::shared_ptr<GameHost> gameHost;
 	std::shared_ptr<GraphicsContext> graphicsContext;
-	std::shared_ptr<Texture2D> texture;
-	std::shared_ptr<RenderTarget2D> renderTarget;
-	std::unique_ptr<SpriteRenderer> spriteRenderer;
-	std::unique_ptr<FXAA> fxaa;
+	std::unique_ptr<GameLevel> level;
 	Renderer renderer;
 	GameWorld gameWorld;
-	GameObject mainCamera;
-	GameObject littleWitch;
+	Scene scene;
 };
 
 }// namespace Majokko

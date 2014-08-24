@@ -102,6 +102,10 @@
         '<@(pomdog_experimental_2d_sources)',
         '../Source/MajokkoGame.cpp',
         '../Source/MajokkoGame.hpp',
+        '../Source/MajokkoGameLevel.cpp',
+        '../Source/MajokkoGameLevel.hpp',
+        '../Source/RenderLayer.cpp',
+        '../Source/RenderLayer.hpp',
       ],
       'conditions': [
         ['OS == "win"', {
