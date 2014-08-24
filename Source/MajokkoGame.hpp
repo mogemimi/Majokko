@@ -31,12 +31,18 @@ public:
 	void Draw() override;
 	
 private:
+	void DrawScene(Transform2D const& transform, Camera2D const& camera);
+	
+private:
 	std::shared_ptr<GameHost> gameHost;
 	std::shared_ptr<GraphicsContext> graphicsContext;
 	std::shared_ptr<Texture2D> texture;
 	std::shared_ptr<RenderTarget2D> renderTarget;
 	std::unique_ptr<SpriteRenderer> spriteRenderer;
 	std::unique_ptr<FXAA> fxaa;
+	Renderer renderer;
+	GameObject mainCamera;
+	GameWorld gameWorld;
 };
 
 }// namespace Majokko
