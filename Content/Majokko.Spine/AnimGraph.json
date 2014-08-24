@@ -1,0 +1,22 @@
+{
+  "nodes": [
+    {
+      "type": "clip",
+      "clip": "GoForward",
+      "id": 421
+    },
+    {
+      "type": "clip",
+      "clip": "Idle",
+      "id": 422
+    }
+  ],
+  "states": {
+    "Run": {
+      "tree": 421
+    },
+    "Idle": {
+      "tree": 422
+    }
+  }
+}

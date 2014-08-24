@@ -41,8 +41,9 @@ private:
 	std::unique_ptr<SpriteRenderer> spriteRenderer;
 	std::unique_ptr<FXAA> fxaa;
 	Renderer renderer;
-	GameObject mainCamera;
 	GameWorld gameWorld;
+	GameObject mainCamera;
+	GameObject littleWitch;
 };
 
 }// namespace Majokko
