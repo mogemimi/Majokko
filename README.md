@@ -45,6 +45,9 @@ python setup.py install
 ```bash
 cd Majokko
 git clone https://github.com/mogemimi/pomdog.git pomdog
+cd pomdog
+git checkout -b gamedev origin/gamedev
+cd ..
 ```
 
 ### Building under Mac OS X and Xcode
