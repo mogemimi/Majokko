@@ -1,4 +1,4 @@
-﻿//
+//
 //  Copyright (C) 2014 mogemimi.
 //
 //  Distributed under the MIT License.
@@ -11,6 +11,12 @@
 namespace Majokko {
 namespace {
 
+class Movable: public Component<Movable> {
+public:
+	Vector2 Velocity = Vector2::Zero;
+	Vector2 Thrust = Vector2::Zero;
+};
+
 class Bullet: public Component<Bullet> {
 public:
 };
@@ -21,6 +27,56 @@ struct GameCommandShot {
 struct GameCommandMove {
 	Vector2 Direction = Vector2::Zero;
 };
+
+struct GameCommandStop {
+};
+
+class PlayerCommandTranslator {
+public:
+	void Translate(DurationSeconds const& frameDuration, KeyboardState const& keyboardState, EventQueue & eventQueue);
+	
+private:
+	bool spaceKeyPressed = false;
+};
+
+void PlayerCommandTranslator::Translate(DurationSeconds const& frameDuration, KeyboardState const& keyboardState, EventQueue & eventQueue)
+{
+	{
+		Vector2 direction = Vector2::Zero;
+
+		if (keyboardState.IsKeyDown(Keys::W)) {
+			direction.Y += 1.0f;
+		}
+		if (keyboardState.IsKeyDown(Keys::A)) {
+			direction.X += -1.0f;
+		}
+		if (keyboardState.IsKeyDown(Keys::S)) {
+			direction.Y += -1.0f;
+		}
+		if (keyboardState.IsKeyDown(Keys::D)) {
+			direction.X += 1.0f;
+		}
+		
+		if (direction.LengthSquared() > std::numeric_limits<float>::epsilon()) {
+			eventQueue.Enqueue<GameCommandMove>(direction);
+		}
+		else {
+			eventQueue.Enqueue<GameCommandStop>();
+		}
+	}
+	{
+		if (!spaceKeyPressed && keyboardState.IsKeyDown(Keys::Space))
+		{
+			eventQueue.Enqueue<GameCommandShot>();
+			spaceKeyPressed = true;
+		}
+		
+		if (spaceKeyPressed && keyboardState.IsKeyUp(Keys::Space))
+		{
+			spaceKeyPressed = false;
+		}
+	}
+}
 
 //-----------------------------------------------------------------------
 GameObject CreateLittleWicth(GameWorld & gameWorld,
@@ -71,6 +127,7 @@ MajokkoGameLevel::MajokkoGameLevel(GameHost & gameHost, GameWorld & gameWorld, S
 		littleWitch = CreateLittleWicth(gameWorld, graphicsDevice, *assets);
 		auto transform = littleWitch.Component<Transform2D>();
 		transform->Scale = {0.6f, 0.6f};
+		littleWitch.AddComponent<Movable>();
 	}
 	{
 		auto layer = std::make_shared<GameWorldLayer>(gameHost, gameWorld);
@@ -82,60 +139,78 @@ MajokkoGameLevel::MajokkoGameLevel(GameHost & gameHost, GameWorld & gameWorld, S
 void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 {
 	auto clock = gameHost.Clock();
-
-	auto keyboard = gameHost.Keyboard();
-	auto keyboardState = keyboard->State();
 	
-	{
-		Vector2 direction = Vector2::Zero;
-
-		if (keyboardState.IsKeyDown(Keys::W)) {
-			direction.Y += 1.0f;
-		}
-		if (keyboardState.IsKeyDown(Keys::A)) {
-			direction.X += -1.0f;
-		}
-		if (keyboardState.IsKeyDown(Keys::S)) {
-			direction.Y += -1.0f;
-		}
-		if (keyboardState.IsKeyDown(Keys::D)) {
-			direction.X += 1.0f;
-		}
-		
-		float speed = 180.0f;
-		
-		littleWitch.Component<Transform2D>()->Position += (speed * direction * clock->FrameDuration().count());
+	EventQueue eventQueue;
+	
+	constexpr DurationSeconds castingTime = DurationSeconds{0.07};
+	static DurationSeconds duration = castingTime;
+	
+	if (duration < castingTime) {
+		duration += clock->FrameDuration();
 	}
+	
+	eventQueue.Connect([&](Event const& args)
 	{
-		constexpr DurationSeconds castingTime = DurationSeconds{0.07};
-		static DurationSeconds duration = castingTime;
-		
-		if (duration < castingTime) {
-			duration += clock->FrameDuration();
-		}
-		
-		if (keyboardState.IsKeyDown(Keys::Space))
-		{
-			auto assets = gameHost.AssetManager();
+		if (auto event = args.As<GameCommandMove>()) {
+			constexpr float MaxSpeed = 240.0f;
+			constexpr float MaxThrust = 600.0f;
 			
+			auto normalizedDirection = Vector2::Normalize(event->Direction);
+			auto movable = littleWitch.Component<Movable>();
+			
+			constexpr float mass = 1.0f;
+			movable->Thrust = (MaxThrust * normalizedDirection);
+			movable->Velocity += (mass * movable->Thrust * clock->FrameDuration().count());
+			
+			if (movable->Velocity.LengthSquared() > MaxSpeed * MaxSpeed) {
+				movable->Thrust = Vector2::Zero;
+				movable->Velocity = Vector2::Normalize(movable->Velocity) * MaxSpeed;
+			}
+		}
+		else if (args.Is<GameCommandStop>()) {
+			auto movable = littleWitch.Component<Movable>();
+			
+			movable->Thrust = Vector2::Zero;
+			movable->Velocity = Vector2::Zero;
+		}
+		else if (args.Is<GameCommandShot>()) {
 			if (duration >= castingTime)
 			{
+				auto assets = gameHost.AssetManager();
+			
 				auto bullet = gameWorld.CreateObject();
 				auto texture = assets->Load<Texture2D>("FireBullet.png");
 				bullet.AddComponent<SpriteRenderable>(texture);
 				auto & transform = bullet.AddComponent<Transform2D>();
 				transform.Scale = {0.8f, 0.8f};
-				transform.Position = littleWitch.Component<Transform2D>()->Position;
+				transform.Position = littleWitch.Component<Transform2D>()->Position + Vector2{50.0f, 30.0f};
 				bullet.AddComponent<Bullet>();
 				
 				duration = DurationSeconds::zero();
 			}
 		}
+	});
+
+	auto keyboard = gameHost.Keyboard();
+	auto & keyboardState = keyboard->State();
+	
+	static PlayerCommandTranslator translator;
+	translator.Translate(clock->FrameDuration(), keyboardState, eventQueue);
+
+	eventQueue.Tick();
+
+	{
+		for (auto & entity: gameWorld.QueryComponents<Movable, Transform2D>())
+		{
+			auto transform = entity.Component<Transform2D>();
+			auto movable = entity.Component<Movable>();
+			transform->Position += (movable->Velocity * clock->FrameDuration().count());
+		}
 	}
 	{
 		for (auto & entity: gameWorld.QueryComponents<Bullet, Transform2D>())
 		{
-			constexpr float speed = 600.0f;
+			constexpr float speed = 900.0f;
 			Vector2 direction{1.0f, 0.0f};
 			auto transform = entity.Component<Transform2D>();
 			transform->Position += (direction * speed * clock->FrameDuration().count());
