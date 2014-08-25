@@ -28,18 +28,8 @@ void MajokkoGame::Initialize()
 	auto graphicsDevice = gameHost->GraphicsDevice();
 	auto assets = gameHost->AssetManager();
 	
-	level = std::make_unique<MajokkoGameLevel>(*gameHost, gameWorld);
-	
+	level = std::make_unique<MajokkoGameLevel>(*gameHost, gameWorld, scene);
 	scene.AddLayer(std::make_shared<HUDLayer>());
-	
-	auto layer = std::make_shared<GameWorldLayer>(*gameHost, gameWorld);
-	{
-		auto mainCamera = gameWorld.CreateObject();
-		mainCamera.AddComponent<Camera2D>();
-		mainCamera.AddComponent<Transform2D>();
-		layer->Camera(mainCamera);
-	}
-	scene.AddLayer(layer);
 }
 //-----------------------------------------------------------------------
 void MajokkoGame::Update()

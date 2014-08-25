@@ -51,6 +51,7 @@ GameWorldLayer::GameWorldLayer(GameHost & gameHost, GameWorld & gameWorldIn)
 	: gameWorld(gameWorldIn)
 	, fxaa(gameHost.GraphicsDevice())
 	, color(Color::CornflowerBlue)
+	, fxaaEnabled(false)
 {
 	auto graphicsDevice = gameHost.GraphicsDevice();
 	auto window = gameHost.Window();
@@ -63,9 +64,9 @@ GameWorldLayer::GameWorldLayer(GameHost & gameHost, GameWorld & gameWorldIn)
 	blendState = BlendState::CreateNonPremultiplied(graphicsDevice);
 }
 //-----------------------------------------------------------------------
-void GameWorldLayer::WindowSizeChanged(int width, int height)
-{
-}
+//void GameWorldLayer::WindowSizeChanged(int width, int height)
+//{
+//}
 //-----------------------------------------------------------------------
 void GameWorldLayer::Camera(GameObject const& cameraObjectIn)
 {
@@ -73,11 +74,19 @@ void GameWorldLayer::Camera(GameObject const& cameraObjectIn)
 	this->cameraObject = cameraObjectIn;
 }
 //-----------------------------------------------------------------------
+void GameWorldLayer::FxaaEnabled(bool fxaaEnabledIn)
+{
+	this->fxaaEnabled = fxaaEnabledIn;
+}
+//-----------------------------------------------------------------------
+bool GameWorldLayer::FxaaEnabled() const
+{
+	return this->fxaaEnabled;
+}
+//-----------------------------------------------------------------------
 void GameWorldLayer::Draw(GraphicsContext & graphicsContext, Renderer & renderer)
 {
-	constexpr bool enableFxaa = false;
-
-	if (enableFxaa) {
+	if (fxaaEnabled) {
 		graphicsContext.SetRenderTarget(renderTarget);
 	}
 	
@@ -93,7 +102,7 @@ void GameWorldLayer::Draw(GraphicsContext & graphicsContext, Renderer & renderer
 		DrawScene(graphicsContext, renderer, *transform, *camera);
 	}
 
-	if (enableFxaa) {
+	if (fxaaEnabled) {
 		graphicsContext.SetRenderTarget();
 		graphicsContext.Clear(Color::CornflowerBlue);
 		fxaa.SetTexture(renderTarget);

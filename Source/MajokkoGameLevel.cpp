@@ -11,6 +11,17 @@
 namespace Majokko {
 namespace {
 
+class Bullet: public Component<Bullet> {
+public:
+};
+
+struct GameCommandShot {
+};
+
+struct GameCommandMove {
+	Vector2 Direction = Vector2::Zero;
+};
+
 //-----------------------------------------------------------------------
 GameObject CreateLittleWicth(GameWorld & gameWorld,
 	std::shared_ptr<GraphicsDevice> const& graphicsDevice, AssetManager & assets)
@@ -47,47 +58,93 @@ GameObject CreateLittleWicth(GameWorld & gameWorld,
 
 }// unnamed namespace
 //-----------------------------------------------------------------------
-MajokkoGameLevel::MajokkoGameLevel(GameHost & gameHost, GameWorld & world)
+MajokkoGameLevel::MajokkoGameLevel(GameHost & gameHost, GameWorld & gameWorld, Scene & scene)
 {
 	auto graphicsDevice = gameHost.GraphicsDevice();
 	auto assets = gameHost.AssetManager();
 	{
-		mainCamera = world.CreateObject();
+		mainCamera = gameWorld.CreateObject();
 		mainCamera.AddComponent<Camera2D>();
 		mainCamera.AddComponent<Transform2D>();
 	}
 	{
-		littleWitch = CreateLittleWicth(world, graphicsDevice, *assets);
+		littleWitch = CreateLittleWicth(gameWorld, graphicsDevice, *assets);
 		auto transform = littleWitch.Component<Transform2D>();
 		transform->Scale = {0.6f, 0.6f};
 	}
+	{
+		auto layer = std::make_shared<GameWorldLayer>(gameHost, gameWorld);
+		layer->Camera(mainCamera);
+		scene.AddLayer(layer);
+	}
 }
 //-----------------------------------------------------------------------
-void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & world)
+void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 {
 	auto clock = gameHost.Clock();
 
 	auto keyboard = gameHost.Keyboard();
 	auto keyboardState = keyboard->State();
 	
-	Vector2 direction = Vector2::Zero;
+	{
+		Vector2 direction = Vector2::Zero;
 
-	if (keyboardState.IsKeyDown(Keys::W)) {
-		direction.Y += 1.0f;
+		if (keyboardState.IsKeyDown(Keys::W)) {
+			direction.Y += 1.0f;
+		}
+		if (keyboardState.IsKeyDown(Keys::A)) {
+			direction.X += -1.0f;
+		}
+		if (keyboardState.IsKeyDown(Keys::S)) {
+			direction.Y += -1.0f;
+		}
+		if (keyboardState.IsKeyDown(Keys::D)) {
+			direction.X += 1.0f;
+		}
+		
+		float speed = 180.0f;
+		
+		littleWitch.Component<Transform2D>()->Position += (speed * direction * clock->FrameDuration().count());
 	}
-	if (keyboardState.IsKeyDown(Keys::A)) {
-		direction.X += -1.0f;
+	{
+		constexpr DurationSeconds castingTime = DurationSeconds{0.07};
+		static DurationSeconds duration = castingTime;
+		
+		if (duration < castingTime) {
+			duration += clock->FrameDuration();
+		}
+		
+		if (keyboardState.IsKeyDown(Keys::Space))
+		{
+			auto assets = gameHost.AssetManager();
+			
+			if (duration >= castingTime)
+			{
+				auto bullet = gameWorld.CreateObject();
+				auto texture = assets->Load<Texture2D>("FireBullet.png");
+				bullet.AddComponent<SpriteRenderable>(texture);
+				auto & transform = bullet.AddComponent<Transform2D>();
+				transform.Scale = {0.8f, 0.8f};
+				transform.Position = littleWitch.Component<Transform2D>()->Position;
+				bullet.AddComponent<Bullet>();
+				
+				duration = DurationSeconds::zero();
+			}
+		}
 	}
-	if (keyboardState.IsKeyDown(Keys::S)) {
-		direction.Y += -1.0f;
+	{
+		for (auto & entity: gameWorld.QueryComponents<Bullet, Transform2D>())
+		{
+			constexpr float speed = 600.0f;
+			Vector2 direction{1.0f, 0.0f};
+			auto transform = entity.Component<Transform2D>();
+			transform->Position += (direction * speed * clock->FrameDuration().count());
+
+			if (transform->Position.X > 1000.0f) {
+				entity.Destroy();
+			}
+		}
 	}
-	if (keyboardState.IsKeyDown(Keys::D)) {
-		direction.X += 1.0f;
-	}
-	
-	float speed = 180.0f;
-	
-	littleWitch.Component<Transform2D>()->Position += (speed * direction * clock->FrameDuration().count());
 }
 //-----------------------------------------------------------------------
 }// namespace Majokko

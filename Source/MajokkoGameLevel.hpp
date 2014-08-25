@@ -13,6 +13,7 @@
 #	pragma once
 #endif
 
+#include "RenderLayer.hpp"
 #include "Pomdog.Experimental/Pomdog2D.hpp"
 #include <Pomdog/Pomdog.hpp>
 
@@ -22,7 +23,7 @@ using namespace Pomdog;
 
 class MajokkoGameLevel: public GameLevel {
 public:
-	MajokkoGameLevel(GameHost & gameHost, GameWorld & world);
+	MajokkoGameLevel(GameHost & gameHost, GameWorld & world, Scene & scene);
 
 	void Update(GameHost & gameHost, GameWorld & world) override;
 	

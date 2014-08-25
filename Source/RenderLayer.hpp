@@ -40,11 +40,15 @@ class GameWorldLayer: public RenderLayer {
 public:
 	GameWorldLayer(GameHost & gameHost, GameWorld & gameWorld);
 
-	void WindowSizeChanged(int width, int height);
+	//void WindowSizeChanged(int width, int height);
 
 	void Draw(GraphicsContext & graphicsContext, Renderer & renderer) override;
 	
 	void Camera(GameObject const& cameraObject);
+	
+	void FxaaEnabled(bool fxaaEnabled);
+	
+	bool FxaaEnabled() const;
 	
 private:
 	void DrawScene(GraphicsContext & graphicsContext, Renderer & renderer,
@@ -57,6 +61,7 @@ private:
 	std::shared_ptr<BlendState> blendState;
 	GameObject cameraObject;
 	Color color;
+	bool fxaaEnabled;
 };
 
 
