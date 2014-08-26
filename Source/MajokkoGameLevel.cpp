@@ -11,6 +11,53 @@
 namespace Majokko {
 namespace {
 
+class BoundingCircle {
+public:
+	Vector2 Center;
+	float Radius;
+	
+public:
+	BoundingCircle() = default;
+
+	///@~Japanese
+	/// @param center 球の中心点の位置
+	/// @param radius 球の半径
+	BoundingCircle(Vector2 const& center, float radius);
+	
+	///@~Japanese
+	/// @brief 指定された境界ボリュームを含むかどうかを確認します。
+	ContainmentType Contains(BoundingCircle const&) const;
+	
+	///@~Japanese
+	/// @brief 指定された境界ボリュームと交差するかどうかを確認します。
+	bool Intersects(BoundingCircle const&) const;
+};
+
+BoundingCircle::BoundingCircle(Vector2 const& center, float radius)
+	: Center(center)
+	, Radius(radius)
+{}
+
+ContainmentType BoundingCircle::Contains(BoundingCircle const& circle) const
+{
+	auto distance = Vector2::Distance(this->Center, circle.Center);
+	if (distance > this->Radius + circle.Radius) {
+		return ContainmentType::Disjoint;
+	}
+	if (distance + circle.Radius < this->Radius) {
+		return ContainmentType::Contains;
+	}
+	return ContainmentType::Intersects;
+}
+
+bool BoundingCircle::Intersects(BoundingCircle const& circle) const
+{
+	auto distance = Vector2::Distance(this->Center, circle.Center);
+	return (distance <= this->Radius + circle.Radius);
+}
+
+
+
 class Movable: public Component<Movable> {
 public:
 	Vector2 Velocity = Vector2::Zero;
@@ -19,6 +66,15 @@ public:
 
 class Bullet: public Component<Bullet> {
 public:
+};
+
+class Breakable: public Component<Breakable> {
+public:
+};
+
+class Collider2D: public Component<Collider2D> {
+public:
+	BoundingCircle Bounds;
 };
 
 struct GameCommandShot {
@@ -217,7 +273,11 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 				auto & transform = bullet.AddComponent<Transform2D>();
 				transform.Scale = {0.8f, 0.8f};
 				transform.Position = littleWitch.Component<Transform2D>()->Position + Vector2{50.0f, 30.0f};
+				
 				bullet.AddComponent<Bullet>();
+				auto & collider = bullet.AddComponent<Collider2D>();
+				collider.Bounds.Radius = 20.0f;
+				collider.Bounds.Center = Vector2::Zero;
 				
 				duration = DurationSeconds::zero();
 			}
@@ -272,9 +332,55 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 				
 				auto & movable = ghost.AddComponent<Movable>();
 				movable.Velocity = {-100.0f, 0.0f};
+				
+				ghost.AddComponent<Breakable>();
+				auto & collider = ghost.AddComponent<Collider2D>();
+				collider.Bounds.Radius = 80.0f;
+				collider.Bounds.Center = Vector2::Zero;
 			}
 			
 			duration = DurationSeconds::zero();
+		}
+	}
+	{
+		auto breakables = gameWorld.QueryComponents<Breakable, Collider2D>();
+	
+		for (auto & bullet: gameWorld.QueryComponents<Bullet, Collider2D>())
+		{
+			if (!bullet) {
+				continue;
+			}
+		
+			for (auto & entity: breakables)
+			{
+				if (!entity) {
+					continue;
+				}
+			
+				POMDOG_ASSERT(bullet);
+			
+				auto entityCollider = entity.Component<Collider2D>();
+				auto entityTransform = entity.Component<Transform2D>();
+				
+				auto bulletCollider = bullet.Component<Collider2D>();
+				auto bulletTransform = bullet.Component<Transform2D>();
+				
+				auto entityBounds = entityCollider->Bounds;
+				auto bulletBounds = bulletCollider->Bounds;
+				
+				entityBounds.Center += entityTransform->Position;
+				entityBounds.Radius *= std::max(entityTransform->Scale.X, entityTransform->Scale.Y);
+				
+				bulletBounds.Center += bulletTransform->Position;
+				bulletBounds.Radius *= std::max(bulletTransform->Scale.X, bulletTransform->Scale.Y);
+				
+				if (entityBounds.Intersects(bulletBounds))
+				{
+					entity.Destroy();
+					bullet.Destroy();
+					break;
+				}
+			}
 		}
 	}
 }
