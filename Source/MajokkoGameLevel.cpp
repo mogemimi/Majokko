@@ -163,12 +163,6 @@ MajokkoGameLevel::MajokkoGameLevel(GameHost & gameHost, GameWorld & gameWorld, S
 		littleWitch.AddComponent<Movable>();
 	}
 	{
-		auto ghost = CreateGhost(gameWorld, graphicsDevice, *assets);
-		auto transform = ghost.Component<Transform2D>();
-		transform->Position = {200.0f, 100.0f};
-		transform->Scale = {0.6f, 0.6f};
-	}
-	{
 		auto layer = std::make_shared<GameWorldLayer>(gameHost, gameWorld);
 		layer->Camera(mainCamera);
 		scene.AddLayer(layer);
@@ -257,6 +251,30 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 			if (transform->Position.X > 1000.0f) {
 				entity.Destroy();
 			}
+		}
+	}
+	{
+		constexpr DurationSeconds spawnInterval {5};
+		static DurationSeconds duration = spawnInterval;
+		duration += clock->FrameDuration();
+		
+		
+		if (duration >= spawnInterval)
+		{
+			auto graphicsDevice = gameHost.GraphicsDevice();
+			auto assets = gameHost.AssetManager();
+			
+			for (int i = 0; i < 5; ++i) {
+				auto ghost = CreateGhost(gameWorld, graphicsDevice, *assets);
+				auto transform = ghost.Component<Transform2D>();
+				transform->Position = {600.0f, -100.0f + 100.0f * i};
+				transform->Scale = {0.6f, 0.6f};
+				
+				auto & movable = ghost.AddComponent<Movable>();
+				movable.Velocity = {-100.0f, 0.0f};
+			}
+			
+			duration = DurationSeconds::zero();
 		}
 	}
 }
