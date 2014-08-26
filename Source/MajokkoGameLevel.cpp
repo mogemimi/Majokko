@@ -79,7 +79,7 @@ void PlayerCommandTranslator::Translate(DurationSeconds const& frameDuration, Ke
 }
 
 //-----------------------------------------------------------------------
-GameObject CreateLittleWicth(GameWorld & gameWorld,
+static GameObject CreateLittleWicth(GameWorld & gameWorld,
 	std::shared_ptr<GraphicsDevice> const& graphicsDevice, AssetManager & assets)
 {
 	auto gameObject = gameWorld.CreateObject();
@@ -111,6 +111,39 @@ GameObject CreateLittleWicth(GameWorld & gameWorld,
 	}
 	return std::move(gameObject);
 }
+//-----------------------------------------------------------------------
+static GameObject CreateGhost(GameWorld & gameWorld,
+	std::shared_ptr<GraphicsDevice> const& graphicsDevice, AssetManager & assets)
+{
+	auto gameObject = gameWorld.CreateObject();
+	
+	gameObject.AddComponent<Transform2D>();
+	{
+		auto skeletonDesc = assets.Load<Details::Spine::SkeletonDesc>("Ghost.Spine/Ghost.json");
+		auto skeleton = std::make_shared<Skeleton>(Details::Spine::CreateSkeleton(skeletonDesc.Bones));
+
+		auto skeletonTransform = std::make_shared<SkeletonTransform>();
+		skeletonTransform->Pose = SkeletonPose::CreateBindPose(*skeleton);
+		skeletonTransform->GlobalPose = SkeletonHelper::ToGlobalPose(*skeleton, skeletonTransform->Pose);
+		{
+			auto animationGraph = Details::Spine::LoadAnimationGraph(skeletonDesc, assets, "Ghost.Spine/AnimGraph.json");
+			gameObject.AddComponent(std::make_unique<SkeletonAnimator>(skeleton, skeletonTransform, animationGraph));
+		}
+		{
+			auto textureAtlas = assets.Load<Details::TexturePacker::TextureAtlas>("Ghost.Spine/Ghost.atlas");
+			auto texture = assets.Load<Texture2D>("Ghost.Spine/Ghost.png");
+
+			auto bindPose = SkeletonPose::CreateBindPose(*skeleton);
+			auto mesh = std::make_shared<SkinnedMesh>(Details::Spine::CreateSkinnedMesh(graphicsDevice,
+				SkeletonHelper::ToGlobalPose(*skeleton, bindPose),
+				skeletonDesc, textureAtlas,
+				Vector2(texture->Width(), texture->Height()), "default"));
+
+			gameObject.AddComponent(std::make_unique<SkinnedMeshRenderable>(graphicsDevice, assets, skeleton, skeletonTransform, mesh, texture));
+		}
+	}
+	return std::move(gameObject);
+}
 
 }// unnamed namespace
 //-----------------------------------------------------------------------
@@ -128,6 +161,12 @@ MajokkoGameLevel::MajokkoGameLevel(GameHost & gameHost, GameWorld & gameWorld, S
 		auto transform = littleWitch.Component<Transform2D>();
 		transform->Scale = {0.6f, 0.6f};
 		littleWitch.AddComponent<Movable>();
+	}
+	{
+		auto ghost = CreateGhost(gameWorld, graphicsDevice, *assets);
+		auto transform = ghost.Component<Transform2D>();
+		transform->Position = {200.0f, 100.0f};
+		transform->Scale = {0.6f, 0.6f};
 	}
 	{
 		auto layer = std::make_shared<GameWorldLayer>(gameHost, gameWorld);
@@ -153,7 +192,7 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 	{
 		if (auto event = args.As<GameCommandMove>()) {
 			constexpr float MaxSpeed = 240.0f;
-			constexpr float MaxThrust = 600.0f;
+			constexpr float MaxThrust = 1000.0f;
 			
 			auto normalizedDirection = Vector2::Normalize(event->Direction);
 			auto movable = littleWitch.Component<Movable>();
