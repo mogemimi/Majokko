@@ -24,7 +24,32 @@ public:
 
 class Breakable: public Component<Breakable> {
 public:
+	float Health;
+	float TotalDamage = 0.0f;
+	
+	bool IsDead() const;
+	
+	void Damage(float damage);
+	
+	void ApplyDamage();
 };
+
+bool Breakable::IsDead() const
+{
+	return this->Health <= 0.0f;
+}
+
+void Breakable::ApplyDamage()
+{
+	Health -= TotalDamage;
+	TotalDamage = 0.0f;
+}
+
+void Breakable::Damage(float damage)
+{
+	POMDOG_ASSERT(damage >= 0.0f);
+	TotalDamage += damage;
+}
 
 class Collider2D: public Component<Collider2D> {
 public:
@@ -268,6 +293,15 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 		}
 	}
 	{
+		for (auto & entity: gameWorld.QueryComponents<Breakable, Transform2D>())
+		{
+			auto transform = entity.Component<Transform2D>();
+			if (transform->Position.X < -1000.0f) {
+				entity.Destroy();
+			}
+		}
+	}
+	{
 		constexpr DurationSeconds spawnInterval {5};
 		static DurationSeconds duration = spawnInterval;
 		duration += clock->FrameDuration();
@@ -287,7 +321,9 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 				auto & movable = ghost.AddComponent<Movable>();
 				movable.Velocity = {-100.0f, 0.0f};
 				
-				ghost.AddComponent<Breakable>();
+				auto & breakable = ghost.AddComponent<Breakable>();
+				breakable.Health = 40.0f;
+				
 				auto & collider = ghost.AddComponent<Collider2D>();
 				collider.Bounds.Radius = 80.0f;
 				collider.Bounds.Center = Vector2::Zero;
@@ -305,16 +341,16 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 				continue;
 			}
 		
-			for (auto & entity: breakables)
+			for (auto & enemy: breakables)
 			{
-				if (!entity) {
+				if (!enemy) {
 					continue;
 				}
 			
 				POMDOG_ASSERT(bullet);
 			
-				auto entityCollider = entity.Component<Collider2D>();
-				auto entityTransform = entity.Component<Transform2D>();
+				auto entityCollider = enemy.Component<Collider2D>();
+				auto entityTransform = enemy.Component<Transform2D>();
 				
 				auto bulletCollider = bullet.Component<Collider2D>();
 				auto bulletTransform = bullet.Component<Transform2D>();
@@ -330,10 +366,22 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 				
 				if (ContainmentType::Contains == entityBounds.Contains(bulletBounds))
 				{
-					entity.Destroy();
+					auto breakable = enemy.Component<Breakable>();
+					breakable->Damage(10.0f);
 					bullet.Destroy();
 					break;
 				}
+			}
+		}
+	}
+	{
+		for (auto & entity: gameWorld.QueryComponents<Breakable>())
+		{
+			auto breakable = entity.Component<Breakable>();
+			breakable->ApplyDamage();
+			
+			if (breakable->IsDead()) {
+				entity.Destroy();
 			}
 		}
 	}
