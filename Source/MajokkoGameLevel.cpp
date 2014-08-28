@@ -7,56 +7,10 @@
 //
 
 #include "MajokkoGameLevel.hpp"
+#include "BoundingCircle.hpp"
 
 namespace Majokko {
 namespace {
-
-class BoundingCircle {
-public:
-	Vector2 Center;
-	float Radius;
-	
-public:
-	BoundingCircle() = default;
-
-	///@~Japanese
-	/// @param center 球の中心点の位置
-	/// @param radius 球の半径
-	BoundingCircle(Vector2 const& center, float radius);
-	
-	///@~Japanese
-	/// @brief 指定された境界ボリュームを含むかどうかを確認します。
-	ContainmentType Contains(BoundingCircle const&) const;
-	
-	///@~Japanese
-	/// @brief 指定された境界ボリュームと交差するかどうかを確認します。
-	bool Intersects(BoundingCircle const&) const;
-};
-
-BoundingCircle::BoundingCircle(Vector2 const& center, float radius)
-	: Center(center)
-	, Radius(radius)
-{}
-
-ContainmentType BoundingCircle::Contains(BoundingCircle const& circle) const
-{
-	auto distance = Vector2::Distance(this->Center, circle.Center);
-	if (distance > this->Radius + circle.Radius) {
-		return ContainmentType::Disjoint;
-	}
-	if (distance + circle.Radius < this->Radius) {
-		return ContainmentType::Contains;
-	}
-	return ContainmentType::Intersects;
-}
-
-bool BoundingCircle::Intersects(BoundingCircle const& circle) const
-{
-	auto distance = Vector2::Distance(this->Center, circle.Center);
-	return (distance <= this->Radius + circle.Radius);
-}
-
-
 
 class Movable: public Component<Movable> {
 public:
@@ -374,7 +328,7 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 				bulletBounds.Center += bulletTransform->Position;
 				bulletBounds.Radius *= std::max(bulletTransform->Scale.X, bulletTransform->Scale.Y);
 				
-				if (entityBounds.Intersects(bulletBounds))
+				if (ContainmentType::Contains == entityBounds.Contains(bulletBounds))
 				{
 					entity.Destroy();
 					bullet.Destroy();

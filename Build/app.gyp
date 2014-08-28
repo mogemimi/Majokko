@@ -100,6 +100,8 @@
       'mac_bundle': 1,
       'sources': [
         '<@(pomdog_experimental_2d_sources)',
+        '../Source/BoundingCircle.cpp',
+        '../Source/BoundingCircle.hpp',
         '../Source/MajokkoGame.cpp',
         '../Source/MajokkoGame.hpp',
         '../Source/MajokkoGameLevel.cpp',
