@@ -16,6 +16,7 @@ MajokkoGame::MajokkoGame(std::shared_ptr<GameHost> const& gameHostIn)
 	: gameHost(gameHostIn)
 	, graphicsContext(gameHostIn->GraphicsContext())
 	, renderer(gameHostIn->GraphicsContext(), gameHostIn->GraphicsDevice())
+	, gameTimer(*gameHostIn->Clock())
 {
 }
 //-----------------------------------------------------------------------
@@ -28,20 +29,18 @@ void MajokkoGame::Initialize()
 	auto graphicsDevice = gameHost->GraphicsDevice();
 	auto assets = gameHost->AssetManager();
 	
-	level = std::make_unique<MajokkoGameLevel>(*gameHost, gameWorld, scene);
+	level = std::make_unique<MajokkoGameLevel>(*gameHost, gameTimer, gameWorld, scene);
 	scene.AddLayer(std::make_shared<HUDLayer>());
 }
 //-----------------------------------------------------------------------
 void MajokkoGame::Update()
 {
-	auto clock = gameHost->Clock();
-
 	for (auto & gameObject: gameWorld.QueryComponents<Animator>())
 	{
 		auto animator = gameObject.Component<Animator>();
 		
 		POMDOG_ASSERT(animator);
-		animator->Update(*clock);
+		animator->Update(gameTimer.FrameDuration());
 	}
 	
 	level->Update(*gameHost, gameWorld);

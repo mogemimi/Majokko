@@ -182,7 +182,8 @@ static GameObject CreateGhost(GameWorld & gameWorld,
 
 }// unnamed namespace
 //-----------------------------------------------------------------------
-MajokkoGameLevel::MajokkoGameLevel(GameHost & gameHost, GameWorld & gameWorld, Scene & scene)
+MajokkoGameLevel::MajokkoGameLevel(GameHost & gameHost, Timer & gameTimerIn, GameWorld & gameWorld, Scene & scene)
+	: gameTimer(gameTimerIn)
 {
 	auto graphicsDevice = gameHost.GraphicsDevice();
 	auto assets = gameHost.AssetManager();
@@ -206,15 +207,13 @@ MajokkoGameLevel::MajokkoGameLevel(GameHost & gameHost, GameWorld & gameWorld, S
 //-----------------------------------------------------------------------
 void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 {
-	auto clock = gameHost.Clock();
-	
 	EventQueue eventQueue;
 	
 	constexpr DurationSeconds castingTime = DurationSeconds{0.07};
 	static DurationSeconds duration = castingTime;
 	
 	if (duration < castingTime) {
-		duration += clock->FrameDuration();
+		duration += gameTimer.FrameDuration();
 	}
 	
 	eventQueue.Connect([&](Event const& args)
@@ -228,7 +227,7 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 			
 			constexpr float mass = 1.0f;
 			movable->Thrust = (MaxThrust * normalizedDirection);
-			movable->Velocity += (mass * movable->Thrust * clock->FrameDuration().count());
+			movable->Velocity += (mass * movable->Thrust * gameTimer.FrameDuration().count());
 			
 			if (movable->Velocity.LengthSquared() > MaxSpeed * MaxSpeed) {
 				movable->Thrust = Vector2::Zero;
@@ -267,7 +266,7 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 	auto & keyboardState = keyboard->State();
 	
 	static PlayerCommandTranslator translator;
-	translator.Translate(clock->FrameDuration(), keyboardState, eventQueue);
+	translator.Translate(gameTimer.FrameDuration(), keyboardState, eventQueue);
 
 	eventQueue.Tick();
 
@@ -276,7 +275,7 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 		{
 			auto transform = entity.Component<Transform2D>();
 			auto movable = entity.Component<Movable>();
-			transform->Position += (movable->Velocity * clock->FrameDuration().count());
+			transform->Position += (movable->Velocity * gameTimer.FrameDuration().count());
 		}
 	}
 	{
@@ -285,7 +284,7 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 			constexpr float speed = 900.0f;
 			Vector2 direction{1.0f, 0.0f};
 			auto transform = entity.Component<Transform2D>();
-			transform->Position += (direction * speed * clock->FrameDuration().count());
+			transform->Position += (direction * speed * gameTimer.FrameDuration().count());
 
 			if (transform->Position.X > 1000.0f) {
 				entity.Destroy();
@@ -304,8 +303,7 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 	{
 		constexpr DurationSeconds spawnInterval {5};
 		static DurationSeconds duration = spawnInterval;
-		duration += clock->FrameDuration();
-		
+		duration += gameTimer.FrameDuration();
 		
 		if (duration >= spawnInterval)
 		{

@@ -38,6 +38,7 @@ private:
 	Renderer renderer;
 	GameWorld gameWorld;
 	Scene scene;
+	Timer gameTimer;
 };
 
 }// namespace Majokko
