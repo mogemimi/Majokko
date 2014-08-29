@@ -108,6 +108,8 @@
         '../Source/MajokkoGameLevel.hpp',
         '../Source/RenderLayer.cpp',
         '../Source/RenderLayer.hpp',
+        '../Source/Component/Breakable.cpp',
+        '../Source/Component/Breakable.hpp',
       ],
       'conditions': [
         ['OS == "win"', {

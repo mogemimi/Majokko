@@ -8,53 +8,10 @@
 
 #include "MajokkoGameLevel.hpp"
 #include "BoundingCircle.hpp"
+#include "Breakable.hpp"
 
 namespace Majokko {
 namespace {
-
-class Movable: public Component<Movable> {
-public:
-	Vector2 Velocity = Vector2::Zero;
-	Vector2 Thrust = Vector2::Zero;
-};
-
-class Bullet: public Component<Bullet> {
-public:
-};
-
-class Breakable: public Component<Breakable> {
-public:
-	float Health;
-	float TotalDamage = 0.0f;
-	
-	bool IsDead() const;
-	
-	void Damage(float damage);
-	
-	void ApplyDamage();
-};
-
-bool Breakable::IsDead() const
-{
-	return this->Health <= 0.0f;
-}
-
-void Breakable::ApplyDamage()
-{
-	Health -= TotalDamage;
-	TotalDamage = 0.0f;
-}
-
-void Breakable::Damage(float damage)
-{
-	POMDOG_ASSERT(damage >= 0.0f);
-	TotalDamage += damage;
-}
-
-class Collider2D: public Component<Collider2D> {
-public:
-	BoundingCircle Bounds;
-};
 
 struct GameCommandShot {
 };
@@ -184,6 +141,8 @@ static GameObject CreateGhost(GameWorld & gameWorld,
 //-----------------------------------------------------------------------
 MajokkoGameLevel::MajokkoGameLevel(GameHost & gameHost, Timer & gameTimerIn, GameWorld & gameWorld, Scene & scene)
 	: gameTimer(gameTimerIn)
+	, spawnTimer(*gameHost.Clock())
+	, castingTimer(*gameHost.Clock())
 {
 	auto graphicsDevice = gameHost.GraphicsDevice();
 	auto assets = gameHost.AssetManager();
@@ -207,69 +166,7 @@ MajokkoGameLevel::MajokkoGameLevel(GameHost & gameHost, Timer & gameTimerIn, Gam
 //-----------------------------------------------------------------------
 void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 {
-	EventQueue eventQueue;
-	
-	constexpr DurationSeconds castingTime = DurationSeconds{0.07};
-	static DurationSeconds duration = castingTime;
-	
-	if (duration < castingTime) {
-		duration += gameTimer.FrameDuration();
-	}
-	
-	eventQueue.Connect([&](Event const& args)
-	{
-		if (auto event = args.As<GameCommandMove>()) {
-			constexpr float MaxSpeed = 240.0f;
-			constexpr float MaxThrust = 1000.0f;
-			
-			auto normalizedDirection = Vector2::Normalize(event->Direction);
-			auto movable = littleWitch.Component<Movable>();
-			
-			constexpr float mass = 1.0f;
-			movable->Thrust = (MaxThrust * normalizedDirection);
-			movable->Velocity += (mass * movable->Thrust * gameTimer.FrameDuration().count());
-			
-			if (movable->Velocity.LengthSquared() > MaxSpeed * MaxSpeed) {
-				movable->Thrust = Vector2::Zero;
-				movable->Velocity = Vector2::Normalize(movable->Velocity) * MaxSpeed;
-			}
-		}
-		else if (args.Is<GameCommandStop>()) {
-			auto movable = littleWitch.Component<Movable>();
-			
-			movable->Thrust = Vector2::Zero;
-			movable->Velocity = Vector2::Zero;
-		}
-		else if (args.Is<GameCommandShot>()) {
-			if (duration >= castingTime)
-			{
-				auto assets = gameHost.AssetManager();
-			
-				auto bullet = gameWorld.CreateObject();
-				auto texture = assets->Load<Texture2D>("FireBullet.png");
-				bullet.AddComponent<SpriteRenderable>(texture);
-				auto & transform = bullet.AddComponent<Transform2D>();
-				transform.Scale = {0.8f, 0.8f};
-				transform.Position = littleWitch.Component<Transform2D>()->Position + Vector2{50.0f, 30.0f};
-				
-				bullet.AddComponent<Bullet>();
-				auto & collider = bullet.AddComponent<Collider2D>();
-				collider.Bounds.Radius = 20.0f;
-				collider.Bounds.Center = Vector2::Zero;
-				
-				duration = DurationSeconds::zero();
-			}
-		}
-	});
-
-	auto keyboard = gameHost.Keyboard();
-	auto & keyboardState = keyboard->State();
-	
-	static PlayerCommandTranslator translator;
-	translator.Translate(gameTimer.FrameDuration(), keyboardState, eventQueue);
-
-	eventQueue.Tick();
-
+	UpdatePlayerInput(gameHost, gameWorld);
 	{
 		for (auto & entity: gameWorld.QueryComponents<Movable, Transform2D>())
 		{
@@ -302,10 +199,7 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 	}
 	{
 		constexpr DurationSeconds spawnInterval {5};
-		static DurationSeconds duration = spawnInterval;
-		duration += gameTimer.FrameDuration();
-		
-		if (duration >= spawnInterval)
+		if (spawnTimer.TotalTime() >= spawnInterval)
 		{
 			auto graphicsDevice = gameHost.GraphicsDevice();
 			auto assets = gameHost.AssetManager();
@@ -326,8 +220,7 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 				collider.Bounds.Radius = 80.0f;
 				collider.Bounds.Center = Vector2::Zero;
 			}
-			
-			duration = DurationSeconds::zero();
+			spawnTimer.Reset();
 		}
 	}
 	{
@@ -383,6 +276,66 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 			}
 		}
 	}
+}
+//-----------------------------------------------------------------------
+void MajokkoGameLevel::UpdatePlayerInput(GameHost & gameHost, GameWorld & gameWorld)
+{
+	EventQueue eventQueue;
+	eventQueue.Connect([&](Event const& args)
+	{
+		if (auto event = args.As<GameCommandMove>()) {
+			constexpr float MaxSpeed = 300.0f;
+			constexpr float MaxThrust = 1000.0f;
+			
+			auto normalizedDirection = Vector2::Normalize(event->Direction);
+			auto movable = littleWitch.Component<Movable>();
+			
+			constexpr float mass = 1.0f;
+			movable->Thrust = (MaxThrust * normalizedDirection);
+			movable->Velocity += (mass * movable->Thrust * gameTimer.FrameDuration().count());
+			
+			if (movable->Velocity.LengthSquared() > MaxSpeed * MaxSpeed) {
+				movable->Thrust = Vector2::Zero;
+				movable->Velocity = Vector2::Normalize(movable->Velocity) * MaxSpeed;
+			}
+		}
+		else if (args.Is<GameCommandStop>()) {
+			auto movable = littleWitch.Component<Movable>();
+			
+			movable->Thrust = Vector2::Zero;
+			movable->Velocity = Vector2::Zero;
+		}
+		else if (args.Is<GameCommandShot>()) {
+			constexpr DurationSeconds castingTime = DurationSeconds{0.07};
+			
+			if (castingTimer.TotalTime() >= castingTime)
+			{
+				auto assets = gameHost.AssetManager();
+			
+				auto bullet = gameWorld.CreateObject();
+				auto texture = assets->Load<Texture2D>("FireBullet.png");
+				bullet.AddComponent<SpriteRenderable>(texture);
+				auto & transform = bullet.AddComponent<Transform2D>();
+				transform.Scale = {0.8f, 0.8f};
+				transform.Position = littleWitch.Component<Transform2D>()->Position + Vector2{50.0f, 30.0f};
+				
+				bullet.AddComponent<Bullet>();
+				auto & collider = bullet.AddComponent<Collider2D>();
+				collider.Bounds.Radius = 20.0f;
+				collider.Bounds.Center = Vector2::Zero;
+				
+				castingTimer.Reset();
+			}
+		}
+	});
+
+	auto keyboard = gameHost.Keyboard();
+	auto & keyboardState = keyboard->State();
+	
+	static PlayerCommandTranslator translator;
+	translator.Translate(gameTimer.FrameDuration(), keyboardState, eventQueue);
+
+	eventQueue.Tick();
 }
 //-----------------------------------------------------------------------
 }// namespace Majokko

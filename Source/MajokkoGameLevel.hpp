@@ -23,14 +23,19 @@ using namespace Pomdog;
 
 class MajokkoGameLevel: public GameLevel {
 public:
-	MajokkoGameLevel(GameHost & gameHost, Timer & gameTimer, GameWorld & world, Scene & scene);
+	MajokkoGameLevel(GameHost & gameHost, Timer & gameTimer, GameWorld & gameWorld, Scene & scene);
 
-	void Update(GameHost & gameHost, GameWorld & world) override;
+	void Update(GameHost & gameHost, GameWorld & gameWorld) override;
 	
+private:
+	void UpdatePlayerInput(GameHost & gameHost, GameWorld & gameWorld);
+
 private:
 	GameObject mainCamera;
 	GameObject littleWitch;
 	Timer & gameTimer;
+	Timer spawnTimer;
+	Timer castingTimer;
 };
 
 }// namespace Majokko
