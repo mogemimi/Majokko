@@ -158,6 +158,25 @@ MajokkoGameLevel::MajokkoGameLevel(GameHost & gameHost, Timer & gameTimerIn, Gam
 		littleWitch.AddComponent<Movable>();
 	}
 	{
+		auto background = gameWorld.CreateObject();
+		background.AddComponent<Transform2D>();
+		auto & rectangle = background.AddComponent<RectangleRenderable>();
+		Color color1 = {190, 204, 207, 255};
+		Color color2 = {84-40, 133-40, 153-40, 255};
+		//Color color2 = {84, 133, 153, 255};
+		rectangle.LeftTopColor(color1);
+		rectangle.RightTopColor(color1);
+		rectangle.LeftBottomColor(color2);
+		rectangle.RightBottomColor(color2);
+		auto bounds = gameHost.Window()->ClientBounds();
+		rectangle.BoundingBox({0, 0, bounds.Width, bounds.Height});
+		rectangle.DrawOrder = -1000.0f;
+		
+		///@todo badcode
+		auto depthStencilState = DepthStencilState::CreateNone(graphicsDevice);
+		gameHost.GraphicsContext()->SetDepthStencilState(depthStencilState);
+	}
+	{
 		auto layer = std::make_shared<GameWorldLayer>(gameHost, gameWorld);
 		layer->Camera(mainCamera);
 		scene.AddLayer(layer);
@@ -198,13 +217,13 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 		}
 	}
 	{
-		constexpr DurationSeconds spawnInterval {5};
+		constexpr DurationSeconds spawnInterval {0.7};
 		if (spawnTimer.TotalTime() >= spawnInterval)
 		{
 			auto graphicsDevice = gameHost.GraphicsDevice();
 			auto assets = gameHost.AssetManager();
 			
-			for (int i = 0; i < 5; ++i) {
+			for (int i = 0; i < 3; ++i) {
 				auto ghost = CreateGhost(gameWorld, graphicsDevice, *assets);
 				auto transform = ghost.Component<Transform2D>();
 				transform->Position = {600.0f, -100.0f + 100.0f * i};
@@ -217,7 +236,7 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 				breakable.Health = 40.0f;
 				
 				auto & collider = ghost.AddComponent<Collider2D>();
-				collider.Bounds.Radius = 80.0f;
+				collider.Bounds.Radius = 120.0f;
 				collider.Bounds.Center = Vector2::Zero;
 			}
 			spawnTimer.Reset();
@@ -258,7 +277,7 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 				if (ContainmentType::Contains == entityBounds.Contains(bulletBounds))
 				{
 					auto breakable = enemy.Component<Breakable>();
-					breakable->Damage(10.0f);
+					breakable->Damage(40.0f);
 					bullet.Destroy();
 					break;
 				}
