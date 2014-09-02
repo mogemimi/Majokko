@@ -106,6 +106,8 @@
         '../Source/MajokkoGame.hpp',
         '../Source/MajokkoGameLevel.cpp',
         '../Source/MajokkoGameLevel.hpp',
+        '../Source/VignetteEffect.cpp',
+        '../Source/VignetteEffect.hpp',
         '../Source/RenderLayer.cpp',
         '../Source/RenderLayer.hpp',
         '../Source/Component/Breakable.cpp',

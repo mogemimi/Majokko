@@ -50,6 +50,7 @@ void RenderLayer::DrawOrder(std::int32_t drawOrderIn)
 GameWorldLayer::GameWorldLayer(GameHost & gameHost, GameWorld & gameWorldIn)
 	: gameWorld(gameWorldIn)
 	, fxaa(gameHost.GraphicsDevice())
+	, vignetteEffect(gameHost.GraphicsDevice(), *gameHost.AssetManager())
 	, color(Color::CornflowerBlue)
 	, fxaaEnabled(false)
 {
@@ -60,6 +61,7 @@ GameWorldLayer::GameWorldLayer(GameHost & gameHost, GameWorld & gameWorldIn)
 		window->ClientBounds().Width, window->ClientBounds().Height);
 	
 	fxaa.SetViewport(window->ClientBounds().Width, window->ClientBounds().Height);
+	vignetteEffect.SetViewport(window->ClientBounds().Width, window->ClientBounds().Height);
 
 	blendState = BlendState::CreateNonPremultiplied(graphicsDevice);
 }
@@ -103,10 +105,15 @@ void GameWorldLayer::Draw(GraphicsContext & graphicsContext, Renderer & renderer
 	}
 
 	if (fxaaEnabled) {
+//		graphicsContext.SetRenderTarget();
+//		graphicsContext.Clear(Color::CornflowerBlue);
+//		fxaa.SetTexture(renderTarget);
+//		fxaa.Draw(graphicsContext);
+
 		graphicsContext.SetRenderTarget();
 		graphicsContext.Clear(Color::CornflowerBlue);
-		fxaa.SetTexture(renderTarget);
-		fxaa.Draw(graphicsContext);
+		vignetteEffect.SetTexture(renderTarget);
+		vignetteEffect.Draw(graphicsContext);
 	}
 }
 //-----------------------------------------------------------------------
