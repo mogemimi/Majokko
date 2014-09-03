@@ -161,8 +161,8 @@ MajokkoGameLevel::MajokkoGameLevel(GameHost & gameHost, Timer & gameTimerIn, Gam
 		auto background = gameWorld.CreateObject();
 		background.AddComponent<Transform2D>();
 		auto & rectangle = background.AddComponent<RectangleRenderable>();
-		Color color1 = {190, 204, 207, 255};
-		Color color2 = {84-40, 133-40, 153-40, 255};
+		Color color1 = {84-40, 133-40, 153-40, 255};
+		Color color2 = {190, 204, 207, 255};
 		//Color color2 = {84, 133, 153, 255};
 		rectangle.LeftTopColor(color1);
 		rectangle.RightTopColor(color1);
