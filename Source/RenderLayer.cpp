@@ -50,21 +50,26 @@ void RenderLayer::DrawOrder(std::int32_t drawOrderIn)
 GameWorldLayer::GameWorldLayer(GameHost & gameHost, GameWorld & gameWorldIn)
 	: gameWorld(gameWorldIn)
 	, fxaa(gameHost.GraphicsDevice())
+	, grayscaleEffect(gameHost.GraphicsDevice(), *gameHost.AssetManager())
 	, sepiaToneEffect(gameHost.GraphicsDevice(), *gameHost.AssetManager())
 	, vignetteEffect(gameHost.GraphicsDevice(), *gameHost.AssetManager())
 	, color(Color::CornflowerBlue)
-	, fxaaEnabled(false)
+	, postProcessSettings{false, false, false, true}
 {
 	auto graphicsDevice = gameHost.GraphicsDevice();
 	auto window = gameHost.Window();
 
-	renderTarget = std::make_shared<RenderTarget2D>(graphicsDevice,
-		window->ClientBounds().Width, window->ClientBounds().Height,
-		true, SurfaceFormat::R32G32B32A32_Float, DepthFormat::None);
+	for (auto & renderTarget: renderTargets)
+	{
+		renderTarget = std::make_shared<RenderTarget2D>(graphicsDevice,
+			window->ClientBounds().Width, window->ClientBounds().Height,
+			true, SurfaceFormat::R8G8B8A8_UNorm, DepthFormat::None);
+	}
 	
 	fxaa.SetViewport(window->ClientBounds().Width, window->ClientBounds().Height);
 	vignetteEffect.SetViewport(window->ClientBounds().Width, window->ClientBounds().Height);
 	sepiaToneEffect.SetViewport(window->ClientBounds().Width, window->ClientBounds().Height);
+	grayscaleEffect.SetViewport(window->ClientBounds().Width, window->ClientBounds().Height);
 
 	blendState = BlendState::CreateNonPremultiplied(graphicsDevice);
 }
@@ -81,51 +86,99 @@ void GameWorldLayer::Camera(GameObject const& cameraObjectIn)
 //-----------------------------------------------------------------------
 void GameWorldLayer::FxaaEnabled(bool fxaaEnabledIn)
 {
-	this->fxaaEnabled = fxaaEnabledIn;
+	this->postProcessSettings.fxaaEnabled = fxaaEnabledIn;
 }
 //-----------------------------------------------------------------------
 bool GameWorldLayer::FxaaEnabled() const
 {
-	return this->fxaaEnabled;
+	return this->postProcessSettings.fxaaEnabled;
 }
 //-----------------------------------------------------------------------
 void GameWorldLayer::Draw(GraphicsContext & graphicsContext, Renderer & renderer)
 {
-	if (fxaaEnabled) {
-		graphicsContext.SetRenderTarget(renderTarget);
+	std::vector<std::function<void(std::shared_ptr<RenderTarget2D> const&)>> postProcessEffects;
+	postProcessEffects.reserve(4);
+
+	if (postProcessSettings.fxaaEnabled)
+	{
+		postProcessEffects.push_back([&](std::shared_ptr<RenderTarget2D> const& sourceTexture) {
+			graphicsContext.Clear(Color::CornflowerBlue);
+			fxaa.SetTexture(sourceTexture);
+			fxaa.Draw(graphicsContext);
+			graphicsContext.SetTexture(0);
+		});
 	}
 	
-	graphicsContext.Clear(Color::CornflowerBlue);
-	graphicsContext.SetBlendState(blendState);
-	
+	if (postProcessSettings.vignetteEnabled)
 	{
+		postProcessEffects.push_back([&](std::shared_ptr<RenderTarget2D> const& sourceTexture) {
+			graphicsContext.Clear(Color::CornflowerBlue);
+			vignetteEffect.SetTexture(sourceTexture);
+			vignetteEffect.Draw(graphicsContext);
+			graphicsContext.SetTexture(0);
+		});
+	}
+		
+	if (postProcessSettings.grayscaleEnabled)
+	{
+		postProcessEffects.push_back([&](std::shared_ptr<RenderTarget2D> const& sourceTexture) {
+			graphicsContext.Clear(Color::CornflowerBlue);
+			grayscaleEffect.SetTexture(sourceTexture);
+			grayscaleEffect.Draw(graphicsContext);
+			graphicsContext.SetTexture(0);
+		});
+	}
+	
+	if (postProcessSettings.sepiaToneEnabled)
+	{
+		postProcessEffects.push_back([&](std::shared_ptr<RenderTarget2D> const& sourceTexture) {
+			graphicsContext.Clear(Color::CornflowerBlue);
+			sepiaToneEffect.SetTexture(sourceTexture);
+			sepiaToneEffect.Draw(graphicsContext);
+			graphicsContext.SetTexture(0);
+		});
+	}
+
+	auto outRenderTarget = renderTargets[0];
+	auto inRenderTarget = renderTargets[1];
+
+	if (!postProcessEffects.empty()) {
+		graphicsContext.SetRenderTarget(outRenderTarget);
+	}
+		
+	{
+		graphicsContext.Clear(Color::CornflowerBlue);
+		graphicsContext.SetBlendState(blendState);
+	
 		POMDOG_ASSERT(cameraObject);
 		auto camera = cameraObject.Component<Camera2D>();
 		auto transform = cameraObject.Component<Transform2D>();
 		
 		POMDOG_ASSERT(transform && camera);
-		DrawScene(graphicsContext, renderer, *transform, *camera);
+		DrawScene(graphicsContext, renderer, outRenderTarget, *transform, *camera);
+		
+		std::swap(inRenderTarget, outRenderTarget);
 	}
-
-	if (fxaaEnabled) {
-//		graphicsContext.SetRenderTarget();
-//		graphicsContext.Clear(Color::CornflowerBlue);
-//		fxaa.SetTexture(renderTarget);
-//		fxaa.Draw(graphicsContext);
-
-		graphicsContext.SetRenderTarget();
-		graphicsContext.Clear(Color::CornflowerBlue);
-		vignetteEffect.SetTexture(renderTarget);
-		vignetteEffect.Draw(graphicsContext);
-
-//		graphicsContext.SetRenderTarget();
-//		graphicsContext.Clear(Color::CornflowerBlue);
-//		sepiaToneEffect.SetTexture(renderTarget);
-//		sepiaToneEffect.Draw(graphicsContext);
+	
+	size_t effectCount = 1;
+	for (auto & applyPostEffect: postProcessEffects)
+	{
+		const bool effectEnd = effectCount >= postProcessEffects.size();
+		if (effectEnd) {
+			graphicsContext.SetRenderTarget();
+		}
+		else {
+			graphicsContext.SetRenderTarget(outRenderTarget);
+		}
+		
+		applyPostEffect(inRenderTarget);
+		std::swap(inRenderTarget, outRenderTarget);
+		++effectCount;
 	}
 }
 //-----------------------------------------------------------------------
 void GameWorldLayer::DrawScene(GraphicsContext & graphicsContext, Renderer & renderer,
+	std::shared_ptr<RenderTarget2D> const& renderTarget,
 	Transform2D const& transform, Camera2D const& camera)
 {
 	auto clientBounds = renderTarget->Bounds();

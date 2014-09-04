@@ -13,6 +13,7 @@
 #	pragma once
 #endif
 
+#include "ImageEffects/GrayscaleEffect.hpp"
 #include "ImageEffects/SepiaToneEffect.hpp"
 #include "ImageEffects/VignetteEffect.hpp"
 #include "Pomdog.Experimental/Pomdog2D.hpp"
@@ -36,6 +37,12 @@ private:
 };
 
 
+struct PostProcessSettings {
+	bool fxaaEnabled = false;
+	bool grayscaleEnabled = false;
+	bool sepiaToneEnabled = false;
+	bool vignetteEnabled = false;
+};
 
 
 class GameWorldLayer: public RenderLayer {
@@ -54,19 +61,21 @@ public:
 	
 private:
 	void DrawScene(GraphicsContext & graphicsContext, Renderer & renderer,
+		std::shared_ptr<RenderTarget2D> const& renderTarget,
 		Transform2D const& transform, Camera2D const& camera);
 	
 private:
 	GameWorld & gameWorld;
 	FXAA fxaa;
+	GrayscaleEffect grayscaleEffect;
 	SepiaToneEffect sepiaToneEffect;
 	VignetteEffect vignetteEffect;
 	
-	std::shared_ptr<RenderTarget2D> renderTarget;
+	std::array<std::shared_ptr<RenderTarget2D>, 2> renderTargets;
 	std::shared_ptr<BlendState> blendState;
 	GameObject cameraObject;
 	Color color;
-	bool fxaaEnabled;
+	PostProcessSettings postProcessSettings;
 };
 
 

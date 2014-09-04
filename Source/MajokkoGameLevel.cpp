@@ -180,7 +180,6 @@ MajokkoGameLevel::MajokkoGameLevel(GameHost & gameHost, Timer & gameTimerIn, Gam
 		auto layer = std::make_shared<GameWorldLayer>(gameHost, gameWorld);
 		layer->Camera(mainCamera);
 		scene.AddLayer(layer);
-		layer->FxaaEnabled(true);
 	}
 }
 //-----------------------------------------------------------------------
