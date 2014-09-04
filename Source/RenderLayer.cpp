@@ -50,6 +50,7 @@ void RenderLayer::DrawOrder(std::int32_t drawOrderIn)
 GameWorldLayer::GameWorldLayer(GameHost & gameHost, GameWorld & gameWorldIn)
 	: gameWorld(gameWorldIn)
 	, fxaa(gameHost.GraphicsDevice())
+	, sepiaToneEffect(gameHost.GraphicsDevice(), *gameHost.AssetManager())
 	, vignetteEffect(gameHost.GraphicsDevice(), *gameHost.AssetManager())
 	, color(Color::CornflowerBlue)
 	, fxaaEnabled(false)
@@ -58,10 +59,12 @@ GameWorldLayer::GameWorldLayer(GameHost & gameHost, GameWorld & gameWorldIn)
 	auto window = gameHost.Window();
 
 	renderTarget = std::make_shared<RenderTarget2D>(graphicsDevice,
-		window->ClientBounds().Width, window->ClientBounds().Height);
+		window->ClientBounds().Width, window->ClientBounds().Height,
+		true, SurfaceFormat::R32G32B32A32_Float, DepthFormat::None);
 	
 	fxaa.SetViewport(window->ClientBounds().Width, window->ClientBounds().Height);
 	vignetteEffect.SetViewport(window->ClientBounds().Width, window->ClientBounds().Height);
+	sepiaToneEffect.SetViewport(window->ClientBounds().Width, window->ClientBounds().Height);
 
 	blendState = BlendState::CreateNonPremultiplied(graphicsDevice);
 }
@@ -114,6 +117,11 @@ void GameWorldLayer::Draw(GraphicsContext & graphicsContext, Renderer & renderer
 		graphicsContext.Clear(Color::CornflowerBlue);
 		vignetteEffect.SetTexture(renderTarget);
 		vignetteEffect.Draw(graphicsContext);
+
+//		graphicsContext.SetRenderTarget();
+//		graphicsContext.Clear(Color::CornflowerBlue);
+//		sepiaToneEffect.SetTexture(renderTarget);
+//		sepiaToneEffect.Draw(graphicsContext);
 	}
 }
 //-----------------------------------------------------------------------

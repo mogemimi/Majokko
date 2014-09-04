@@ -15,7 +15,6 @@
 #include "Pomdog/Graphics/EffectParameter.hpp"
 #include "Pomdog/Graphics/GraphicsContext.hpp"
 #include "Pomdog/Graphics/GraphicsDevice.hpp"
-#include "Pomdog/Graphics/IndexBuffer.hpp"
 #include "Pomdog/Graphics/InputLayout.hpp"
 #include "Pomdog/Graphics/PrimitiveTopology.hpp"
 #include "Pomdog/Graphics/RenderTarget2D.hpp"
@@ -33,46 +32,28 @@ VignetteEffect::VignetteEffect(std::shared_ptr<GraphicsDevice> const& graphicsDe
 	samplerLinear = SamplerState::CreateLinearWrap(graphicsDevice);
 	
 	{
-		using VertexCombined = CustomVertex<Vector3, Vector2>;
+		using ScreenQuadVertex = CustomVertex<Vector3, Vector2>;
 		
-		std::array<VertexCombined, 4> const verticesCombo = {
-			Vector3{-1.0f, -1.0f, 0.0f}, Vector2{0.0f, 0.0f},
-			Vector3{-1.0f,  1.0f, 0.0f}, Vector2{0.0f, 1.0f},
-			Vector3{ 1.0f,  1.0f, 0.0f}, Vector2{1.0f, 1.0f},
-			Vector3{ 1.0f, -1.0f, 0.0f}, Vector2{1.0f, 0.0f},
+		std::array<ScreenQuadVertex, 4> const verticesCombo = {
+			Vector3{-1.0f, -1.0f, 0.5f}, Vector2{0.0f, 0.0f},
+			Vector3{-1.0f,  1.0f, 0.5f}, Vector2{0.0f, 1.0f},
+			Vector3{ 1.0f,  1.0f, 0.5f}, Vector2{1.0f, 1.0f},
+			Vector3{ 1.0f, -1.0f, 0.5f}, Vector2{1.0f, 0.0f},
 		};
+		
+		std::array<ScreenQuadVertex, 6> const vertices = {
+			verticesCombo[0], verticesCombo[1], verticesCombo[2],
+			verticesCombo[2], verticesCombo[3], verticesCombo[0],
+		};
+		
 		vertexBuffer = std::make_shared<VertexBuffer>(graphicsDevice,
-			verticesCombo.data(), verticesCombo.size(),
-			VertexCombined::Declaration().StrideBytes(), BufferUsage::Immutable);
+			vertices.data(), vertices.size(), sizeof(ScreenQuadVertex), BufferUsage::Immutable);
 	}
 	{
 		effectPass = assets.Load<EffectPass>("Shaders/Vignette");
 		constantBuffers = std::make_shared<ConstantBufferBinding>(graphicsDevice, *effectPass);
 		inputLayout = std::make_shared<InputLayout>(graphicsDevice, effectPass);
 	}
-	{
-		std::array<std::uint16_t, 6> const indices = {
-			0, 1, 2,
-			2, 3, 0
-		};
-
-		// Create index buffer
-		indexBuffer = std::make_shared<IndexBuffer>(graphicsDevice,
-			IndexElementSize::SixteenBits, indices.data(), indices.size(), BufferUsage::Immutable);
-	}
-//#ifdef DEBUG
-//	{
-//		auto effectReflection = std::make_shared<EffectReflection>(graphicsDevice, effectPass);
-//	
-//		auto stream = Log::Stream();
-//		for (auto & description: effectReflection->GetConstantBuffers()) {
-//			stream << "-----------------------" << "\n";
-//			stream << "     Name: " << description.Name << "\n";
-//			stream << " ByteSize: " << description.ByteSize << "\n";
-//			stream << "Variables: " << description.Variables.size() << "\n";
-//		}
-//	}
-//#endif
 }
 //-----------------------------------------------------------------------
 void VignetteEffect::SetViewport(float width, float height)
@@ -97,7 +78,7 @@ void VignetteEffect::Draw(GraphicsContext & graphicsContext)
 	graphicsContext.SetVertexBuffer(vertexBuffer);
 	graphicsContext.SetEffectPass(effectPass);
 	graphicsContext.SetConstantBuffers(constantBuffers);
-	graphicsContext.DrawIndexed(PrimitiveTopology::TriangleList, indexBuffer, indexBuffer->IndexCount());
+	graphicsContext.Draw(PrimitiveTopology::TriangleList, vertexBuffer->VertexCount());
 }
 //-----------------------------------------------------------------------
 }// namespace Pomdog

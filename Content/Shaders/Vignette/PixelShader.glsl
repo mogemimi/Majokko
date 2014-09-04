@@ -1,12 +1,16 @@
 #version 330
 
-in VertexData {
-	vec4 TextureCoord;
+in QuadVertexShaderOutput {
+	vec2 TextureCoord;
 } In;
 
 uniform Constants {
 	vec2 RenderTargetPixelSize;
 };
+
+//uniform VignetteProps {
+//	float Intensity;
+//};
 
 uniform sampler2D Texture;
 
@@ -62,6 +66,6 @@ void main()
 	
 	// Linear Burn blending
 	color.rgb = max(color.rgb + vignetteTV - 1.0, 0.0);
-	
+
 	FragColor = dummy + color;
 }

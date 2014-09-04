@@ -13,7 +13,8 @@
 #	pragma once
 #endif
 
-#include "VignetteEffect.hpp"
+#include "ImageEffects/SepiaToneEffect.hpp"
+#include "ImageEffects/VignetteEffect.hpp"
 #include "Pomdog.Experimental/Pomdog2D.hpp"
 #include <Pomdog/Pomdog.hpp>
 
@@ -58,7 +59,9 @@ private:
 private:
 	GameWorld & gameWorld;
 	FXAA fxaa;
+	SepiaToneEffect sepiaToneEffect;
 	VignetteEffect vignetteEffect;
+	
 	std::shared_ptr<RenderTarget2D> renderTarget;
 	std::shared_ptr<BlendState> blendState;
 	GameObject cameraObject;

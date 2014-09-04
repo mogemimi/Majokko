@@ -6,8 +6,8 @@
 //  http://enginetrouble.net/pomdog/LICENSE.md for details.
 //
 
-#ifndef MAJOKKO_VIGNETTEEFFECT_AAA2D308_9F5B_4046_AD6E_20E00AC52A9E_HPP
-#define MAJOKKO_VIGNETTEEFFECT_AAA2D308_9F5B_4046_AD6E_20E00AC52A9E_HPP
+#ifndef MAJOKKO_GRAYSCALEEFFECT_E498349A_BA58_486B_B534_54D83AEBE966_HPP
+#define MAJOKKO_GRAYSCALEEFFECT_E498349A_BA58_486B_B534_54D83AEBE966_HPP
 
 #if (_MSC_VER > 1000)
 #	pragma once
@@ -19,9 +19,9 @@
 
 namespace Pomdog {
 
-class VignetteEffect {
+class GrayscaleEffect {
 public:
-	VignetteEffect(std::shared_ptr<GraphicsDevice> const& graphicsDevice, AssetManager & assets);
+	GrayscaleEffect(std::shared_ptr<GraphicsDevice> const& graphicsDevice, AssetManager & assets);
 	
 	void SetViewport(float width, float height);
 	void SetTexture(std::shared_ptr<RenderTarget2D> const& texture);
@@ -32,7 +32,6 @@ private:
 	std::shared_ptr<RenderTarget2D> texture;
 	std::shared_ptr<SamplerState> samplerLinear;
 	std::shared_ptr<VertexBuffer> vertexBuffer;
-	std::shared_ptr<IndexBuffer> indexBuffer;
 	std::shared_ptr<EffectPass> effectPass;
 	std::shared_ptr<ConstantBufferBinding> constantBuffers;
 	std::shared_ptr<InputLayout> inputLayout;
@@ -40,4 +39,4 @@ private:
 
 }// namespace Pomdog
 
-#endif // !defined(MAJOKKO_VIGNETTEEFFECT_AAA2D308_9F5B_4046_AD6E_20E00AC52A9E_HPP)
+#endif // !defined(MAJOKKO_GRAYSCALEEFFECT_E498349A_BA58_486B_B534_54D83AEBE966_HPP)
