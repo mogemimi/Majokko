@@ -38,9 +38,17 @@ void MajokkoGame::Update()
 	for (auto & gameObject: gameWorld.QueryComponents<Animator>())
 	{
 		auto animator = gameObject.Component<Animator>();
-		
 		POMDOG_ASSERT(animator);
+		
 		animator->Update(gameTimer.FrameDuration());
+	}
+	
+	for (auto & gameObject: gameWorld.QueryComponents<ParticleSystem>())
+	{
+		auto particleSystem = gameObject.Component<ParticleSystem>();
+		POMDOG_ASSERT(particleSystem);
+		
+		particleSystem->Simulate(gameObject, gameTimer.FrameDuration());
 	}
 	
 	level->Update(*gameHost, gameWorld);

@@ -72,7 +72,8 @@ private:
 	VignetteEffect vignetteEffect;
 	
 	std::array<std::shared_ptr<RenderTarget2D>, 2> renderTargets;
-	std::shared_ptr<BlendState> blendState;
+	std::shared_ptr<BlendState> blendStateNonPremultiplied;
+	std::shared_ptr<BlendState> blendStateAlphaBlend;
 	GameObject cameraObject;
 	Color color;
 	PostProcessSettings postProcessSettings;

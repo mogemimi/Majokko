@@ -71,7 +71,8 @@ GameWorldLayer::GameWorldLayer(GameHost & gameHost, GameWorld & gameWorldIn)
 	sepiaToneEffect.SetViewport(window->ClientBounds().Width, window->ClientBounds().Height);
 	grayscaleEffect.SetViewport(window->ClientBounds().Width, window->ClientBounds().Height);
 
-	blendState = BlendState::CreateNonPremultiplied(graphicsDevice);
+	blendStateNonPremultiplied = BlendState::CreateNonPremultiplied(graphicsDevice);
+	blendStateAlphaBlend = BlendState::CreateAlphaBlend(graphicsDevice);
 }
 //-----------------------------------------------------------------------
 //void GameWorldLayer::WindowSizeChanged(int width, int height)
@@ -145,10 +146,13 @@ void GameWorldLayer::Draw(GraphicsContext & graphicsContext, Renderer & renderer
 	if (!postProcessEffects.empty()) {
 		graphicsContext.SetRenderTarget(outRenderTarget);
 	}
-		
+	
+	
+	auto blendStateOld = graphicsContext.GetBlendState();
+
 	{
 		graphicsContext.Clear(Color::CornflowerBlue);
-		graphicsContext.SetBlendState(blendState);
+		graphicsContext.SetBlendState(blendStateNonPremultiplied);
 	
 		POMDOG_ASSERT(cameraObject);
 		auto camera = cameraObject.Component<Camera2D>();
@@ -159,6 +163,8 @@ void GameWorldLayer::Draw(GraphicsContext & graphicsContext, Renderer & renderer
 		
 		std::swap(inRenderTarget, outRenderTarget);
 	}
+	
+	graphicsContext.SetBlendState(blendStateAlphaBlend);
 	
 	size_t effectCount = 1;
 	for (auto & applyPostEffect: postProcessEffects)
@@ -175,6 +181,8 @@ void GameWorldLayer::Draw(GraphicsContext & graphicsContext, Renderer & renderer
 		std::swap(inRenderTarget, outRenderTarget);
 		++effectCount;
 	}
+	
+	graphicsContext.SetBlendState(blendStateOld);
 }
 //-----------------------------------------------------------------------
 void GameWorldLayer::DrawScene(GraphicsContext & graphicsContext, Renderer & renderer,

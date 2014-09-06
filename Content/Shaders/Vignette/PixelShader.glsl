@@ -42,11 +42,17 @@ float ScaledCircleVignette(vec2 textureCoord, float radius, float softness, vec2
 float OldTVVignette(vec2 textureCoord)
 {
 	const float radius = 0.516;
-	const float softness = 0.016;
+	const float softness = 0.015;
 
 	float vignette = ScaledCircleVignette(In.TextureCoord.xy, radius, softness, vec2(1.0, 0.27))
 		* ScaledCircleVignette(In.TextureCoord.xy, radius, softness, vec2(0.5, 0.9));
 	return vignette;
+}
+
+// Linear Burn blending
+vec3 ApplyLinearBurn(vec3 base, float blend)
+{
+	return max(base + blend - 1.0, 0.0);
 }
 
 void main()
@@ -63,9 +69,8 @@ void main()
 	
 	// Multiply blending
 	color.rgb *= vignette;
-	
-	// Linear Burn blending
-	color.rgb = max(color.rgb + vignetteTV - 1.0, 0.0);
 
-	FragColor = dummy + color;
+	color.rgb = ApplyLinearBurn(color.rgb, vignetteTV);
+
+	FragColor = dummy + vec4(color.rgb, 1.0);
 }
