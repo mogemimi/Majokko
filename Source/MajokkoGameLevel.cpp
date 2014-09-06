@@ -177,10 +177,26 @@ MajokkoGameLevel::MajokkoGameLevel(GameHost & gameHost, Timer & gameTimerIn, Gam
 		gameHost.GraphicsContext()->SetDepthStencilState(depthStencilState);
 	}
 	{
+		auto entity = gameWorld.CreateObject();
+		entity.AddComponent<Transform2D>();
+		auto particleClip = std::make_shared<ParticleClip>(Details::ParticleLoader::Load(*assets, "Particles/explosion_smoke.json"));
+		auto texture = assets->Load<Texture2D>("Particles/explosion_smoke.png");
+		auto blendState = BlendState::CreateNonPremultiplied(graphicsDevice);
+		auto & particleSystem = entity.AddComponent<ParticleSystem>(particleClip);
+		particleSystem.Loop(true);
+		
+		entity.AddComponent<ParticleRenderable>(texture, blendState);
+	}
+	{
 		auto layer = std::make_shared<GameWorldLayer>(gameHost, gameWorld);
 		layer->Camera(mainCamera);
 		scene.AddLayer(layer);
 	}
+//	{
+//		gameTimer.Scale(0.5f);
+//		spawnTimer.Scale(0.5f);
+//		castingTimer.Scale(0.5f);
+//	}
 }
 //-----------------------------------------------------------------------
 void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
@@ -291,6 +307,15 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 			breakable->ApplyDamage();
 			
 			if (breakable->IsDead()) {
+				entity.Destroy();
+			}
+		}
+	}
+	{
+		for (auto & entity: gameWorld.QueryComponents<ParticleSystem>())
+		{
+			auto paritcleSystem = entity.Component<ParticleSystem>();
+			if (!paritcleSystem->IsAlive()) {
 				entity.Destroy();
 			}
 		}
