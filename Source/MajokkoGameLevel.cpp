@@ -192,9 +192,10 @@ MajokkoGameLevel::MajokkoGameLevel(GameHost & gameHost, Timer & gameTimerIn, Gam
 		scene.AddLayer(layer);
 	}
 //	{
-//		gameTimer.Scale(0.5f);
-//		spawnTimer.Scale(0.5f);
-//		castingTimer.Scale(0.5f);
+//		constexpr float timeScale = 0.1f;
+//		gameTimer.Scale(timeScale);
+//		spawnTimer.Scale(timeScale);
+//		castingTimer.Scale(timeScale);
 //	}
 }
 //-----------------------------------------------------------------------
@@ -375,13 +376,25 @@ void MajokkoGameLevel::UpdatePlayerInput(GameHost & gameHost, GameWorld & gameWo
 	{
 		auto movable = littleWitch.Component<Movable>();
 		auto anim = littleWitch.Component<Animator>();
-		constexpr float MaxSpeed = 300.0f;
-		const auto min = -MaxSpeed;
-		const auto max = MaxSpeed;
-		const auto range = max - min;
-		const auto normalizedWeight = (movable->Velocity.X - min) / range;
 		
-		anim->SetFloat("Weight", normalizedWeight);
+		if (movable->Velocity.LengthSquared() == 0.0f) {
+			if (anim->GetCurrentStateName() != "Idle") {
+				anim->CrossFade("Idle", std::chrono::milliseconds(400));
+			}
+		}
+		else {
+			if (anim->GetCurrentStateName() != "Run") {
+				anim->CrossFade("Run", std::chrono::milliseconds(300));
+			}
+		
+			constexpr float MaxSpeed = 300.0f;
+			const auto min = -MaxSpeed;
+			const auto max = MaxSpeed;
+			const auto range = max - min;
+			const auto normalizedWeight = (movable->Velocity.X - min) / range;
+			
+			anim->SetFloat("Weight", normalizedWeight);
+		}
 	}
 
 	auto keyboard = gameHost.Keyboard();
