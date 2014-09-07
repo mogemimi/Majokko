@@ -163,7 +163,6 @@ MajokkoGameLevel::MajokkoGameLevel(GameHost & gameHost, Timer & gameTimerIn, Gam
 		auto & rectangle = background.AddComponent<RectangleRenderable>();
 		Color color1 = {84-40, 133-40, 153-40, 255};
 		Color color2 = {190, 204, 207, 255};
-		//Color color2 = {84, 133, 153, 255};
 		rectangle.LeftTopColor(color1);
 		rectangle.RightTopColor(color1);
 		rectangle.LeftBottomColor(color2);
@@ -176,17 +175,17 @@ MajokkoGameLevel::MajokkoGameLevel(GameHost & gameHost, Timer & gameTimerIn, Gam
 		auto depthStencilState = DepthStencilState::CreateNone(graphicsDevice);
 		gameHost.GraphicsContext()->SetDepthStencilState(depthStencilState);
 	}
-	{
-		auto entity = gameWorld.CreateObject();
-		entity.AddComponent<Transform2D>();
-		auto particleClip = std::make_shared<ParticleClip>(Details::ParticleLoader::Load(*assets, "Particles/explosion_smoke.json"));
-		auto texture = assets->Load<Texture2D>("Particles/explosion_smoke.png");
-		auto blendState = BlendState::CreateNonPremultiplied(graphicsDevice);
-		auto & particleSystem = entity.AddComponent<ParticleSystem>(particleClip);
-		particleSystem.Loop(true);
-		
-		entity.AddComponent<ParticleRenderable>(texture, blendState);
-	}
+//	{
+//		auto entity = gameWorld.CreateObject();
+//		entity.AddComponent<Transform2D>();
+//		auto particleClip = std::make_shared<ParticleClip>(Details::ParticleLoader::Load(*assets, "Particles/explosion_smoke.json"));
+//		auto texture = assets->Load<Texture2D>("Particles/explosion_smoke.png");
+//		auto blendState = BlendState::CreateNonPremultiplied(graphicsDevice);
+//		auto & particleSystem = entity.AddComponent<ParticleSystem>(particleClip);
+//		particleSystem.Loop(true);
+//		
+//		entity.AddComponent<ParticleRenderable>(texture, blendState);
+//	}
 	{
 		auto layer = std::make_shared<GameWorldLayer>(gameHost, gameWorld);
 		layer->Camera(mainCamera);
@@ -372,6 +371,12 @@ void MajokkoGameLevel::UpdatePlayerInput(GameHost & gameHost, GameWorld & gameWo
 			}
 		}
 	});
+	
+	{
+		auto movable = littleWitch.Component<Movable>();
+		auto anim = littleWitch.Component<Animator>();
+		anim->SetFloat("Weight", MathHelper::Clamp(Vector2::Normalize(movable->Velocity).Y, 0.0f, 1.0f));
+	}
 
 	auto keyboard = gameHost.Keyboard();
 	auto & keyboardState = keyboard->State();

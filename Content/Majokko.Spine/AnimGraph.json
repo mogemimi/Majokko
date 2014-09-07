@@ -9,11 +9,17 @@
       "type": "clip",
       "clip": "Idle",
       "id": 422
+    },
+    {
+      "type": "lerp",
+      "id": 420,
+      "param_name": "Weight",
+      "in": [421, 422]
     }
   ],
   "states": {
     "Run": {
-      "tree": 421
+      "tree": 420
     },
     "Idle": {
       "tree": 422
