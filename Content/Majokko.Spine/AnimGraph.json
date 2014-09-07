@@ -1,28 +1,30 @@
 {
   "nodes": [
     {
-      "type": "clip",
-      "clip": "GoForward",
-      "id": 421
+      "name": "GoBackward",
+      "type": "clip"
     },
     {
-      "type": "clip",
-      "clip": "Idle",
-      "id": 422
+      "name": "GoForward",
+      "type": "clip"
     },
     {
+      "name": "Idle",
+      "type": "clip"
+    },
+    {
+      "name": "Go_Lerp",
       "type": "lerp",
-      "id": 420,
       "param_name": "Weight",
-      "in": [421, 422]
+      "in": ["GoBackward", "GoForward"]
     }
   ],
   "states": {
     "Run": {
-      "tree": 420
+      "tree": "Go_Lerp"
     },
     "Idle": {
-      "tree": 422
+      "tree": "Idle"
     }
   }
 }

@@ -375,7 +375,13 @@ void MajokkoGameLevel::UpdatePlayerInput(GameHost & gameHost, GameWorld & gameWo
 	{
 		auto movable = littleWitch.Component<Movable>();
 		auto anim = littleWitch.Component<Animator>();
-		anim->SetFloat("Weight", MathHelper::Clamp(Vector2::Normalize(movable->Velocity).Y, 0.0f, 1.0f));
+		constexpr float MaxSpeed = 300.0f;
+		const auto min = -MaxSpeed;
+		const auto max = MaxSpeed;
+		const auto range = max - min;
+		const auto normalizedWeight = (movable->Velocity.X - min) / range;
+		
+		anim->SetFloat("Weight", normalizedWeight);
 	}
 
 	auto keyboard = gameHost.Keyboard();
