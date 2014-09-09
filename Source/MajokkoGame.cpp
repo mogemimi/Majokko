@@ -31,6 +31,23 @@ void MajokkoGame::Initialize()
 	
 	level = std::make_unique<MajokkoGameLevel>(*gameHost, gameTimer, gameWorld, scene);
 	scene.AddLayer(std::make_shared<HUDLayer>());
+	
+	{
+		gameEditor = std::make_unique<SceneEditor::InGameEditor>(gameHost);
+
+		auto stackPanel = std::make_shared<UI::StackPanel>(140, 170);
+		stackPanel->Transform(Matrix3x2::CreateTranslation(Vector2{5, 10}));
+		gameEditor->AddView(stackPanel);
+
+		{
+			auto navigator = std::make_shared<UI::DebugNavigator>(gameHost->Clock());
+			stackPanel->AddChild(navigator);
+		}
+	}
+	{
+		auto bounds = gameHost->Window()->ClientBounds();
+		gameEditor->SetViewProjection(Matrix4x4::CreateOrthographicLH(bounds.Width, bounds.Height, 0.1f, 100.0f));
+	}
 }
 //-----------------------------------------------------------------------
 void MajokkoGame::Update()
@@ -53,15 +70,19 @@ void MajokkoGame::Update()
 	
 	level->Update(*gameHost, gameWorld);
 	gameWorld.Refresh();
+	gameEditor->Update();
 }
 //-----------------------------------------------------------------------
 void MajokkoGame::Draw()
 {
+	gameEditor->BeginDraw(*graphicsContext);
+	
 	for (auto & layer: scene)
 	{
 		layer->Draw(*graphicsContext, renderer);
 	}
 
+	gameEditor->EndDraw(*graphicsContext);
 	graphicsContext->Present();
 }
 //-----------------------------------------------------------------------

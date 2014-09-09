@@ -165,7 +165,7 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 			auto graphicsDevice = gameHost.GraphicsDevice();
 			auto assets = gameHost.AssetManager();
 			
-			for (int i = 0; i < 3; ++i) {
+			for (int i = 0; i < 30; ++i) {
 				Vector2 position = {600.0f, -100.0f + 100.0f * i};
 				factory.CreateGhost(gameWorld, *graphicsDevice, *assets, position);
 			}

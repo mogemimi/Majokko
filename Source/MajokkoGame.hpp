@@ -35,6 +35,7 @@ private:
 	std::shared_ptr<GameHost> gameHost;
 	std::shared_ptr<GraphicsContext> graphicsContext;
 	std::unique_ptr<GameLevel> level;
+	std::shared_ptr<SceneEditor::InGameEditor> gameEditor;
 	Renderer renderer;
 	GameWorld gameWorld;
 	Scene scene;
