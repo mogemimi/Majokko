@@ -106,6 +106,8 @@
         '../Source/MajokkoGame.hpp',
         '../Source/MajokkoGameLevel.cpp',
         '../Source/MajokkoGameLevel.hpp',
+        '../Source/ObjectFactory.cpp',
+        '../Source/ObjectFactory.hpp',
         '../Source/RenderLayer.cpp',
         '../Source/RenderLayer.hpp',
         '../Source/ImageEffects/GrayscaleEffect.cpp',

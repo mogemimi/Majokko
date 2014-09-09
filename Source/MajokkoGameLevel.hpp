@@ -13,6 +13,7 @@
 #	pragma once
 #endif
 
+#include "ObjectFactory.hpp"
 #include "RenderLayer.hpp"
 #include "Pomdog.Experimental/Pomdog2D.hpp"
 #include <Pomdog/Pomdog.hpp>
@@ -31,6 +32,7 @@ private:
 	void UpdatePlayerInput(GameHost & gameHost, GameWorld & gameWorld);
 
 private:
+	ObjectFactory factory;
 	GameObject mainCamera;
 	GameObject littleWitch;
 	Timer & gameTimer;

@@ -70,73 +70,6 @@ void PlayerCommandTranslator::Translate(DurationSeconds const& frameDuration, Ke
 	}
 }
 
-//-----------------------------------------------------------------------
-static GameObject CreateLittleWicth(GameWorld & gameWorld,
-	std::shared_ptr<GraphicsDevice> const& graphicsDevice, AssetManager & assets)
-{
-	auto gameObject = gameWorld.CreateObject();
-	
-	gameObject.AddComponent<Transform2D>();
-	{
-		auto skeletonDesc = assets.Load<Details::Spine::SkeletonDesc>("Majokko.Spine/Majokko.json");
-		auto skeleton = std::make_shared<Skeleton>(Details::Spine::CreateSkeleton(skeletonDesc.Bones));
-
-		auto skeletonTransform = std::make_shared<SkeletonTransform>();
-		skeletonTransform->Pose = SkeletonPose::CreateBindPose(*skeleton);
-		skeletonTransform->GlobalPose = SkeletonHelper::ToGlobalPose(*skeleton, skeletonTransform->Pose);
-		{
-			auto animationGraph = Details::Spine::LoadAnimationGraph(skeletonDesc, assets, "Majokko.Spine/AnimGraph.json");
-			gameObject.AddComponent(std::make_unique<SkeletonAnimator>(skeleton, skeletonTransform, animationGraph));
-		}
-		{
-			auto textureAtlas = assets.Load<Details::TexturePacker::TextureAtlas>("Majokko.Spine/Majokko.atlas");
-			auto texture = assets.Load<Texture2D>("Majokko.Spine/Majokko.png");
-
-			auto bindPose = SkeletonPose::CreateBindPose(*skeleton);
-			auto mesh = std::make_shared<SkinnedMesh>(Details::Spine::CreateSkinnedMesh(graphicsDevice,
-				SkeletonHelper::ToGlobalPose(*skeleton, bindPose),
-				skeletonDesc, textureAtlas,
-				Vector2(texture->Width(), texture->Height()), "default"));
-
-			gameObject.AddComponent(std::make_unique<SkinnedMeshRenderable>(graphicsDevice, assets, skeleton, skeletonTransform, mesh, texture));
-		}
-	}
-	return std::move(gameObject);
-}
-//-----------------------------------------------------------------------
-static GameObject CreateGhost(GameWorld & gameWorld,
-	std::shared_ptr<GraphicsDevice> const& graphicsDevice, AssetManager & assets)
-{
-	auto gameObject = gameWorld.CreateObject();
-	
-	gameObject.AddComponent<Transform2D>();
-	{
-		auto skeletonDesc = assets.Load<Details::Spine::SkeletonDesc>("Ghost.Spine/Ghost.json");
-		auto skeleton = std::make_shared<Skeleton>(Details::Spine::CreateSkeleton(skeletonDesc.Bones));
-
-		auto skeletonTransform = std::make_shared<SkeletonTransform>();
-		skeletonTransform->Pose = SkeletonPose::CreateBindPose(*skeleton);
-		skeletonTransform->GlobalPose = SkeletonHelper::ToGlobalPose(*skeleton, skeletonTransform->Pose);
-		{
-			auto animationGraph = Details::Spine::LoadAnimationGraph(skeletonDesc, assets, "Ghost.Spine/AnimGraph.json");
-			gameObject.AddComponent(std::make_unique<SkeletonAnimator>(skeleton, skeletonTransform, animationGraph));
-		}
-		{
-			auto textureAtlas = assets.Load<Details::TexturePacker::TextureAtlas>("Ghost.Spine/Ghost.atlas");
-			auto texture = assets.Load<Texture2D>("Ghost.Spine/Ghost.png");
-
-			auto bindPose = SkeletonPose::CreateBindPose(*skeleton);
-			auto mesh = std::make_shared<SkinnedMesh>(Details::Spine::CreateSkinnedMesh(graphicsDevice,
-				SkeletonHelper::ToGlobalPose(*skeleton, bindPose),
-				skeletonDesc, textureAtlas,
-				Vector2(texture->Width(), texture->Height()), "default"));
-
-			gameObject.AddComponent(std::make_unique<SkinnedMeshRenderable>(graphicsDevice, assets, skeleton, skeletonTransform, mesh, texture));
-		}
-	}
-	return std::move(gameObject);
-}
-
 }// unnamed namespace
 //-----------------------------------------------------------------------
 MajokkoGameLevel::MajokkoGameLevel(GameHost & gameHost, Timer & gameTimerIn, GameWorld & gameWorld, Scene & scene)
@@ -147,15 +80,8 @@ MajokkoGameLevel::MajokkoGameLevel(GameHost & gameHost, Timer & gameTimerIn, Gam
 	auto graphicsDevice = gameHost.GraphicsDevice();
 	auto assets = gameHost.AssetManager();
 	{
-		mainCamera = gameWorld.CreateObject();
-		mainCamera.AddComponent<Camera2D>();
-		mainCamera.AddComponent<Transform2D>();
-	}
-	{
-		littleWitch = CreateLittleWicth(gameWorld, graphicsDevice, *assets);
-		auto transform = littleWitch.Component<Transform2D>();
-		transform->Scale = {0.6f, 0.6f};
-		littleWitch.AddComponent<Movable>();
+		mainCamera = factory.CreateCamera(gameWorld);
+		littleWitch = factory.CreateLittleWitch(gameWorld, *graphicsDevice, *assets);
 	}
 	{
 		auto background = gameWorld.CreateObject();
@@ -240,20 +166,8 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 			auto assets = gameHost.AssetManager();
 			
 			for (int i = 0; i < 3; ++i) {
-				auto ghost = CreateGhost(gameWorld, graphicsDevice, *assets);
-				auto transform = ghost.Component<Transform2D>();
-				transform->Position = {600.0f, -100.0f + 100.0f * i};
-				transform->Scale = {0.6f, 0.6f};
-				
-				auto & movable = ghost.AddComponent<Movable>();
-				movable.Velocity = {-100.0f, 0.0f};
-				
-				auto & breakable = ghost.AddComponent<Breakable>();
-				breakable.Health = 40.0f;
-				
-				auto & collider = ghost.AddComponent<Collider2D>();
-				collider.Bounds.Radius = 120.0f;
-				collider.Bounds.Center = Vector2::Zero;
+				Vector2 position = {600.0f, -100.0f + 100.0f * i};
+				factory.CreateGhost(gameWorld, *graphicsDevice, *assets, position);
 			}
 			spawnTimer.Reset();
 		}
