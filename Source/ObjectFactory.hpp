@@ -13,11 +13,20 @@
 #	pragma once
 #endif
 
+#include "Pomdog.Experimental/Pomdog2D.hpp"
 #include <Pomdog/Pomdog.hpp>
 
 namespace Majokko {
 
 using namespace Pomdog;
+
+struct SkinnedMeshAnimatorResource {
+	std::shared_ptr<Skeleton> Skeleton;
+	std::shared_ptr<AnimationGraph> AnimationGraph;
+	std::shared_ptr<SkinnedMesh> Mesh;
+	std::shared_ptr<Texture2D> Texture;
+};
+
 
 class ObjectFactory {
 public:
@@ -26,6 +35,10 @@ public:
 	GameObject CreateLittleWitch(GameWorld & gameWorld, GraphicsDevice & graphicsDevice, AssetManager & assets);
 	
 	GameObject CreateGhost(GameWorld & gameWorld, GraphicsDevice & graphicsDevice, AssetManager & assets, Vector2 const& position);
+	
+private:
+	Optional<SkinnedMeshAnimatorResource> littleWitchResource;
+	Optional<SkinnedMeshAnimatorResource> ghostResource;
 };
 
 }// namespace Majokko

@@ -1,4 +1,4 @@
-﻿//
+//
 //  Copyright (C) 2014 mogemimi.
 //
 //  Distributed under the MIT License.
@@ -8,115 +8,116 @@
 
 #include "ObjectFactory.hpp"
 #include "Breakable.hpp"
-#include "Pomdog.Experimental/Pomdog2D.hpp"
 
 namespace Majokko {
 namespace {
 //-----------------------------------------------------------------------
-static GameObject CreateLittleWicth_Impl(GameWorld & gameWorld,
+static SkinnedMeshAnimatorResource CreateLittleWicth_Impl(
 	GraphicsDevice & graphicsDevice, AssetManager & assets)
 {
-	auto gameObject = gameWorld.CreateObject();
+	SkinnedMeshAnimatorResource resource;
+	
+	auto skeletonDesc = assets.Load<Details::Spine::SkeletonDesc>("Majokko.Spine/Majokko.json");
+	resource.Skeleton = std::make_shared<Skeleton>(Details::Spine::CreateSkeleton(skeletonDesc.Bones));
+	resource.AnimationGraph = Details::Spine::LoadAnimationGraph(skeletonDesc, assets, "Majokko.Spine/AnimGraph.json");
 
-	{
-		auto skeletonDesc = assets.Load<Details::Spine::SkeletonDesc>("Majokko.Spine/Majokko.json");
-		auto skeleton = std::make_shared<Skeleton>(Details::Spine::CreateSkeleton(skeletonDesc.Bones));
+	auto textureAtlas = assets.Load<Details::TexturePacker::TextureAtlas>("Majokko.Spine/Majokko.atlas");
+	resource.Texture = assets.Load<Texture2D>("Majokko.Spine/Majokko.png");
 
-		auto skeletonTransform = std::make_shared<SkeletonTransform>();
-		skeletonTransform->Pose = SkeletonPose::CreateBindPose(*skeleton);
-		skeletonTransform->GlobalPose = SkeletonHelper::ToGlobalPose(*skeleton, skeletonTransform->Pose);
-		{
-			auto animationGraph = Details::Spine::LoadAnimationGraph(skeletonDesc, assets, "Majokko.Spine/AnimGraph.json");
-			gameObject.AddComponent(std::make_unique<SkeletonAnimator>(skeleton, skeletonTransform, animationGraph));
-		}
-		{
-			auto textureAtlas = assets.Load<Details::TexturePacker::TextureAtlas>("Majokko.Spine/Majokko.atlas");
-			auto texture = assets.Load<Texture2D>("Majokko.Spine/Majokko.png");
+	auto bindPose = SkeletonPose::CreateBindPose(*resource.Skeleton);
+	resource.Mesh = std::make_shared<SkinnedMesh>(Details::Spine::CreateSkinnedMesh(graphicsDevice,
+		SkeletonHelper::ToGlobalPose(*resource.Skeleton, bindPose),
+		skeletonDesc, textureAtlas,
+		Vector2(resource.Texture->Width(), resource.Texture->Height()), "default"));
 
-			auto bindPose = SkeletonPose::CreateBindPose(*skeleton);
-			auto mesh = std::make_shared<SkinnedMesh>(Details::Spine::CreateSkinnedMesh(graphicsDevice,
-				SkeletonHelper::ToGlobalPose(*skeleton, bindPose),
-				skeletonDesc, textureAtlas,
-				Vector2(texture->Width(), texture->Height()), "default"));
-
-			gameObject.AddComponent(std::make_unique<SkinnedMeshRenderable>(graphicsDevice, assets, skeleton, skeletonTransform, mesh, texture));
-		}
-	}
-	return std::move(gameObject);
+	return std::move(resource);
 }
 //-----------------------------------------------------------------------
-static GameObject CreateGhost_Impl(GameWorld & gameWorld,
+static SkinnedMeshAnimatorResource CreateGhost_Impl(
 	GraphicsDevice & graphicsDevice, AssetManager & assets)
 {
-	auto gameObject = gameWorld.CreateObject();
+	SkinnedMeshAnimatorResource resource;
 	
-	gameObject.AddComponent<Transform2D>();
-	{
-		auto skeletonDesc = assets.Load<Details::Spine::SkeletonDesc>("Ghost.Spine/Ghost.json");
-		auto skeleton = std::make_shared<Skeleton>(Details::Spine::CreateSkeleton(skeletonDesc.Bones));
+	auto skeletonDesc = assets.Load<Details::Spine::SkeletonDesc>("Ghost.Spine/Ghost.json");
+	resource.Skeleton = std::make_shared<Skeleton>(Details::Spine::CreateSkeleton(skeletonDesc.Bones));
+	resource.AnimationGraph = Details::Spine::LoadAnimationGraph(skeletonDesc, assets, "Ghost.Spine/AnimGraph.json");
 
-		auto skeletonTransform = std::make_shared<SkeletonTransform>();
-		skeletonTransform->Pose = SkeletonPose::CreateBindPose(*skeleton);
-		skeletonTransform->GlobalPose = SkeletonHelper::ToGlobalPose(*skeleton, skeletonTransform->Pose);
-		{
-			auto animationGraph = Details::Spine::LoadAnimationGraph(skeletonDesc, assets, "Ghost.Spine/AnimGraph.json");
-			gameObject.AddComponent(std::make_unique<SkeletonAnimator>(skeleton, skeletonTransform, animationGraph));
-		}
-		{
-			auto textureAtlas = assets.Load<Details::TexturePacker::TextureAtlas>("Ghost.Spine/Ghost.atlas");
-			auto texture = assets.Load<Texture2D>("Ghost.Spine/Ghost.png");
+	auto textureAtlas = assets.Load<Details::TexturePacker::TextureAtlas>("Ghost.Spine/Ghost.atlas");
+	resource.Texture = assets.Load<Texture2D>("Ghost.Spine/Ghost.png");
 
-			auto bindPose = SkeletonPose::CreateBindPose(*skeleton);
-			auto mesh = std::make_shared<SkinnedMesh>(Details::Spine::CreateSkinnedMesh(graphicsDevice,
-				SkeletonHelper::ToGlobalPose(*skeleton, bindPose),
-				skeletonDesc, textureAtlas,
-				Vector2(texture->Width(), texture->Height()), "default"));
+	auto bindPose = SkeletonPose::CreateBindPose(*resource.Skeleton);
+	resource.Mesh = std::make_shared<SkinnedMesh>(Details::Spine::CreateSkinnedMesh(graphicsDevice,
+		SkeletonHelper::ToGlobalPose(*resource.Skeleton, bindPose),
+		skeletonDesc, textureAtlas,
+		Vector2(resource.Texture->Width(), resource.Texture->Height()), "default"));
 
-			gameObject.AddComponent(std::make_unique<SkinnedMeshRenderable>(graphicsDevice, assets, skeleton, skeletonTransform, mesh, texture));
-		}
-	}
-	return std::move(gameObject);
+	return std::move(resource);
+}
+//-----------------------------------------------------------------------
+static void BuildObjectByAnimatorResource(GameObject & gameObject,
+	GraphicsDevice & graphicsDevice, SkinnedMeshAnimatorResource const& resource)
+{
+	auto skeletonTransform = std::make_shared<SkeletonTransform>();
+	skeletonTransform->Pose = SkeletonPose::CreateBindPose(*resource.Skeleton);
+	skeletonTransform->GlobalPose = SkeletonHelper::ToGlobalPose(*resource.Skeleton, skeletonTransform->Pose);
+	gameObject.AddComponent(std::make_unique<SkeletonAnimator>(resource.Skeleton, skeletonTransform, resource.AnimationGraph));
+
+	gameObject.AddComponent(std::make_unique<SkinnedMeshRenderable>(
+		graphicsDevice, resource.Skeleton, skeletonTransform, resource.Mesh, resource.Texture));
 }
 
 }// unnamed namespace
 //-----------------------------------------------------------------------
 GameObject ObjectFactory::CreateCamera(GameWorld & gameWorld)
 {
-	auto camera = gameWorld.CreateObject();
-	camera.AddComponent<Camera2D>();
-	camera.AddComponent<Transform2D>();
-	return std::move(camera);
+	auto entity = gameWorld.CreateObject();
+	entity.AddComponent<Camera2D>();
+	entity.AddComponent<Transform2D>();
+	return std::move(entity);
 }
 //-----------------------------------------------------------------------
 GameObject ObjectFactory::CreateLittleWitch(GameWorld & gameWorld, GraphicsDevice & graphicsDevice, AssetManager & assets)
 {
-	auto littleWitch = CreateLittleWicth_Impl(gameWorld, graphicsDevice, assets);
-	littleWitch.AddComponent<Transform2D>();
-	littleWitch.AddComponent<Movable>();
+	auto entity = gameWorld.CreateObject();
 	
-	auto transform = littleWitch.Component<Transform2D>();
-	transform->Scale = {0.6f, 0.6f};
+	auto & transform = entity.AddComponent<Transform2D>();
+	transform.Scale = {0.6f, 0.6f};
 	
-	return std::move(littleWitch);
+	entity.AddComponent<Movable>();
+	
+	if (!littleWitchResource) {
+		littleWitchResource = CreateLittleWicth_Impl(graphicsDevice, assets);
+	}
+	BuildObjectByAnimatorResource(entity, graphicsDevice, *littleWitchResource);
+
+	return std::move(entity);
 }
 //-----------------------------------------------------------------------
 GameObject ObjectFactory::CreateGhost(GameWorld & gameWorld, GraphicsDevice & graphicsDevice, AssetManager & assets, Vector2 const& position)
 {
-	auto ghost = CreateGhost_Impl(gameWorld, graphicsDevice, assets);
-	auto transform = ghost.Component<Transform2D>();
+	auto entity = gameWorld.CreateObject();
+	entity.AddComponent<Transform2D>();
+
+	auto transform = entity.Component<Transform2D>();
 	transform->Position = position;
 	transform->Scale = {0.6f, 0.6f};
 
-	auto & movable = ghost.AddComponent<Movable>();
+	auto & movable = entity.AddComponent<Movable>();
 	movable.Velocity = {-100.0f, 0.0f};
 
-	auto & breakable = ghost.AddComponent<Breakable>();
+	auto & breakable = entity.AddComponent<Breakable>();
 	breakable.Health = 40.0f;
 
-	auto & collider = ghost.AddComponent<Collider2D>();
+	auto & collider = entity.AddComponent<Collider2D>();
 	collider.Bounds.Radius = 120.0f;
 	collider.Bounds.Center = Vector2::Zero;
-	return std::move(ghost);
+	
+	if (!ghostResource) {
+		ghostResource = CreateGhost_Impl(graphicsDevice, assets);
+	}
+	BuildObjectByAnimatorResource(entity, graphicsDevice, *ghostResource);
+	
+	return std::move(entity);
 }
 //-----------------------------------------------------------------------
 }// namespace Majokko
