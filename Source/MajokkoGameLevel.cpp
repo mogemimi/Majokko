@@ -28,7 +28,7 @@ public:
 	void Translate(DurationSeconds const& frameDuration, KeyboardState const& keyboardState, EventQueue & eventQueue);
 	
 private:
-	bool spaceKeyPressed = false;
+	//bool spaceKeyPressed = false;
 };
 
 void PlayerCommandTranslator::Translate(DurationSeconds const& frameDuration, KeyboardState const& keyboardState, EventQueue & eventQueue)
@@ -57,17 +57,23 @@ void PlayerCommandTranslator::Translate(DurationSeconds const& frameDuration, Ke
 		}
 	}
 	{
-		if (!spaceKeyPressed && keyboardState.IsKeyDown(Keys::Space))
+		if (keyboardState.IsKeyDown(Keys::Space))
 		{
 			eventQueue.Enqueue<GameCommandShot>();
-			spaceKeyPressed = true;
-		}
-		
-		if (spaceKeyPressed && keyboardState.IsKeyUp(Keys::Space))
-		{
-			spaceKeyPressed = false;
 		}
 	}
+//	{
+//		if (!spaceKeyPressed && keyboardState.IsKeyDown(Keys::Space))
+//		{
+//			eventQueue.Enqueue<GameCommandShot>();
+//			spaceKeyPressed = true;
+//		}
+//		
+//		if (spaceKeyPressed && keyboardState.IsKeyUp(Keys::Space))
+//		{
+//			spaceKeyPressed = false;
+//		}
+//	}
 }
 
 }// unnamed namespace
@@ -207,7 +213,7 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 				if (ContainmentType::Contains == entityBounds.Contains(bulletBounds))
 				{
 					auto breakable = enemy.Component<Breakable>();
-					breakable->Damage(40.0f);
+					breakable->Damage(10.0f);
 					bullet.Destroy();
 					break;
 				}
@@ -264,23 +270,13 @@ void MajokkoGameLevel::UpdatePlayerInput(GameHost & gameHost, GameWorld & gameWo
 			movable->Velocity = Vector2::Zero;
 		}
 		else if (args.Is<GameCommandShot>()) {
-			constexpr DurationSeconds castingTime = DurationSeconds{0.07};
+			constexpr DurationSeconds castingTime = std::chrono::milliseconds(55);
 			
 			if (castingTimer.TotalTime() >= castingTime)
 			{
 				auto assets = gameHost.AssetManager();
-			
-				auto bullet = gameWorld.CreateObject();
-				auto texture = assets->Load<Texture2D>("FireBullet.png");
-				bullet.AddComponent<SpriteRenderable>(texture);
-				auto & transform = bullet.AddComponent<Transform2D>();
-				transform.Scale = {0.8f, 0.8f};
-				transform.Position = littleWitch.Component<Transform2D>()->Position + Vector2{50.0f, 30.0f};
-				
-				bullet.AddComponent<Bullet>();
-				auto & collider = bullet.AddComponent<Collider2D>();
-				collider.Bounds.Radius = 20.0f;
-				collider.Bounds.Center = Vector2::Zero;
+				auto position = littleWitch.Component<Transform2D>()->Position + Vector2{50.0f, 30.0f};
+				auto bullet = factory.CreateBullet(gameWorld, *assets, position);
 				
 				castingTimer.Reset();
 			}

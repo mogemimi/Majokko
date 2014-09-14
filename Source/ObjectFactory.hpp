@@ -36,6 +36,8 @@ public:
 	
 	GameObject CreateGhost(GameWorld & gameWorld, GraphicsDevice & graphicsDevice, AssetManager & assets, Vector2 const& position);
 	
+	GameObject CreateBullet(GameWorld & gameWorld, AssetManager & assets, Vector2 const& position);
+	
 private:
 	Optional<SkinnedMeshAnimatorResource> littleWitchResource;
 	Optional<SkinnedMeshAnimatorResource> ghostResource;

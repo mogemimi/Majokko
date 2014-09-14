@@ -60,7 +60,7 @@ static void BuildObjectByAnimatorResource(GameObject & gameObject,
 	auto skeletonTransform = std::make_shared<SkeletonTransform>();
 	skeletonTransform->Pose = SkeletonPose::CreateBindPose(*resource.Skeleton);
 	skeletonTransform->GlobalPose = SkeletonHelper::ToGlobalPose(*resource.Skeleton, skeletonTransform->Pose);
-	gameObject.AddComponent(std::make_unique<SkeletonAnimator>(resource.Skeleton, skeletonTransform, resource.AnimationGraph));
+	gameObject.AddComponent(std::make_unique<Animator>(resource.Skeleton, skeletonTransform, resource.AnimationGraph));
 
 	gameObject.AddComponent(std::make_unique<SkinnedMeshRenderable>(
 		graphicsDevice, resource.Skeleton, skeletonTransform, resource.Mesh, resource.Texture));
@@ -106,7 +106,7 @@ GameObject ObjectFactory::CreateGhost(GameWorld & gameWorld, GraphicsDevice & gr
 	movable.Velocity = {-100.0f, 0.0f};
 
 	auto & breakable = entity.AddComponent<Breakable>();
-	breakable.Health = 40.0f;
+	breakable.Health = 30.0f;
 
 	auto & collider = entity.AddComponent<Collider2D>();
 	collider.Bounds.Radius = 120.0f;
@@ -118,6 +118,23 @@ GameObject ObjectFactory::CreateGhost(GameWorld & gameWorld, GraphicsDevice & gr
 	BuildObjectByAnimatorResource(entity, graphicsDevice, *ghostResource);
 	
 	return std::move(entity);
+}
+//-----------------------------------------------------------------------
+GameObject ObjectFactory::CreateBullet(GameWorld & gameWorld, AssetManager & assets, Vector2 const& position)
+{
+	auto bullet = gameWorld.CreateObject();
+	auto texture = assets.Load<Texture2D>("FireBullet.png");
+	bullet.AddComponent<SpriteRenderable>(texture);
+	auto & transform = bullet.AddComponent<Transform2D>();
+	transform.Scale = {0.8f, 0.8f};
+	transform.Position = position;
+
+	bullet.AddComponent<Bullet>();
+	auto & collider = bullet.AddComponent<Collider2D>();
+	collider.Bounds.Radius = 20.0f;
+	collider.Bounds.Center = Vector2::Zero;
+	
+	return std::move(bullet);
 }
 //-----------------------------------------------------------------------
 }// namespace Majokko
