@@ -124,7 +124,7 @@ MajokkoGameLevel::MajokkoGameLevel(GameHost & gameHost, Timer & gameTimerIn, Gam
 		scene.AddLayer(layer);
 	}
 //	{
-//		constexpr float timeScale = 0.1f;
+//		constexpr float timeScale = 0.3f;
 //		gameTimer.Scale(timeScale);
 //		spawnTimer.Scale(timeScale);
 //		castingTimer.Scale(timeScale);
@@ -133,7 +133,7 @@ MajokkoGameLevel::MajokkoGameLevel(GameHost & gameHost, Timer & gameTimerIn, Gam
 //-----------------------------------------------------------------------
 void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 {
-	UpdatePlayerInput(gameHost, gameWorld);
+	auto UpdateMovable = [&]
 	{
 		for (auto & entity: gameWorld.QueryComponents<Movable, Transform2D>())
 		{
@@ -141,7 +141,9 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 			auto movable = entity.Component<Movable>();
 			transform->Position += (movable->Velocity * gameTimer.FrameDuration().count());
 		}
-	}
+	};
+	
+	auto UpdateBullet = [&]
 	{
 		for (auto & entity: gameWorld.QueryComponents<Bullet, Transform2D>())
 		{
@@ -154,7 +156,9 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 				entity.Destroy();
 			}
 		}
-	}
+	};
+	
+	auto DestroyUnusedBreakable = [&]
 	{
 		for (auto & entity: gameWorld.QueryComponents<Breakable, Transform2D>())
 		{
@@ -163,7 +167,9 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 				entity.Destroy();
 			}
 		}
-	}
+	};
+	
+	auto SpawnGhost = [&]
 	{
 		constexpr DurationSeconds spawnInterval {0.7};
 		if (spawnTimer.TotalTime() >= spawnInterval)
@@ -177,7 +183,9 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 			}
 			spawnTimer.Reset();
 		}
-	}
+	};
+	
+	auto CheckCollision = [&]
 	{
 		auto breakables = gameWorld.QueryComponents<Breakable, Collider2D>();
 	
@@ -219,7 +227,9 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 				}
 			}
 		}
-	}
+	};
+	
+	auto ApplyDamageToBreakable = [&]
 	{
 		for (auto & entity: gameWorld.QueryComponents<Breakable>())
 		{
@@ -230,7 +240,9 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 				entity.Destroy();
 			}
 		}
-	}
+	};
+	
+	auto DestroyUnusedParticles = [&]
 	{
 		for (auto & entity: gameWorld.QueryComponents<ParticleSystem>())
 		{
@@ -239,7 +251,16 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 				entity.Destroy();
 			}
 		}
-	}
+	};
+	
+	UpdatePlayerInput(gameHost, gameWorld);
+	UpdateMovable();
+	UpdateBullet();
+	DestroyUnusedBreakable();
+	CheckCollision();
+	ApplyDamageToBreakable();
+	SpawnGhost();
+	DestroyUnusedParticles();
 }
 //-----------------------------------------------------------------------
 void MajokkoGameLevel::UpdatePlayerInput(GameHost & gameHost, GameWorld & gameWorld)
