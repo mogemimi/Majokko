@@ -1,4 +1,4 @@
-﻿//
+//
 //  Copyright (C) 2014 mogemimi.
 //
 //  Distributed under the MIT License.
@@ -49,6 +49,7 @@ void RenderLayer::DrawOrder(std::int32_t drawOrderIn)
 //-----------------------------------------------------------------------
 GameWorldLayer::GameWorldLayer(GameHost & gameHost, GameWorld & gameWorldIn)
 	: gameWorld(gameWorldIn)
+	, screenQuad(gameHost.GraphicsDevice())
 	, fxaa(gameHost.GraphicsDevice())
 	, grayscaleEffect(gameHost.GraphicsDevice(), *gameHost.AssetManager())
 	, sepiaToneEffect(gameHost.GraphicsDevice(), *gameHost.AssetManager())
@@ -105,7 +106,8 @@ void GameWorldLayer::Draw(GraphicsContext & graphicsContext, Renderer & renderer
 		postProcessEffects.push_back([&](std::shared_ptr<RenderTarget2D> const& sourceTexture) {
 			graphicsContext.Clear(Color::CornflowerBlue);
 			fxaa.SetTexture(sourceTexture);
-			fxaa.Draw(graphicsContext);
+			fxaa.Apply(graphicsContext);
+			screenQuad.DrawQuad(graphicsContext);
 			graphicsContext.SetTexture(0);
 		});
 	}
@@ -115,7 +117,8 @@ void GameWorldLayer::Draw(GraphicsContext & graphicsContext, Renderer & renderer
 		postProcessEffects.push_back([&](std::shared_ptr<RenderTarget2D> const& sourceTexture) {
 			graphicsContext.Clear(Color::CornflowerBlue);
 			vignetteEffect.SetTexture(sourceTexture);
-			vignetteEffect.Draw(graphicsContext);
+			vignetteEffect.Apply(graphicsContext);
+			screenQuad.DrawQuad(graphicsContext);
 			graphicsContext.SetTexture(0);
 		});
 	}
@@ -125,7 +128,8 @@ void GameWorldLayer::Draw(GraphicsContext & graphicsContext, Renderer & renderer
 		postProcessEffects.push_back([&](std::shared_ptr<RenderTarget2D> const& sourceTexture) {
 			graphicsContext.Clear(Color::CornflowerBlue);
 			grayscaleEffect.SetTexture(sourceTexture);
-			grayscaleEffect.Draw(graphicsContext);
+			grayscaleEffect.Apply(graphicsContext);
+			screenQuad.DrawQuad(graphicsContext);
 			graphicsContext.SetTexture(0);
 		});
 	}
@@ -135,7 +139,8 @@ void GameWorldLayer::Draw(GraphicsContext & graphicsContext, Renderer & renderer
 		postProcessEffects.push_back([&](std::shared_ptr<RenderTarget2D> const& sourceTexture) {
 			graphicsContext.Clear(Color::CornflowerBlue);
 			sepiaToneEffect.SetTexture(sourceTexture);
-			sepiaToneEffect.Draw(graphicsContext);
+			sepiaToneEffect.Apply(graphicsContext);
+			screenQuad.DrawQuad(graphicsContext);
 			graphicsContext.SetTexture(0);
 		});
 	}

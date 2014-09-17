@@ -67,6 +67,7 @@ private:
 private:
 	GameWorld & gameWorld;
 	FXAA fxaa;
+	ScreenQuad screenQuad;
 	GrayscaleEffect grayscaleEffect;
 	SepiaToneEffect sepiaToneEffect;
 	VignetteEffect vignetteEffect;

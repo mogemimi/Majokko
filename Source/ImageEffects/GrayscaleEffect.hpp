@@ -1,4 +1,4 @@
-﻿//
+//
 //  Copyright (C) 2014 mogemimi.
 //
 //  Distributed under the MIT License.
@@ -14,7 +14,7 @@
 #endif
 
 #include "Pomdog/Graphics/detail/ForwardDeclarations.hpp"
-#include <Pomdog/Pomdog.hpp>
+#include "Pomdog/Content/AssetManager.hpp"
 #include <memory>
 
 namespace Pomdog {
@@ -26,15 +26,14 @@ public:
 	void SetViewport(float width, float height);
 	void SetTexture(std::shared_ptr<RenderTarget2D> const& texture);
 	
-	void Draw(GraphicsContext & graphicsContext);
+	void Apply(GraphicsContext & graphicsContext);
 	
 private:
 	std::shared_ptr<RenderTarget2D> texture;
 	std::shared_ptr<SamplerState> samplerLinear;
-	std::shared_ptr<VertexBuffer> vertexBuffer;
 	std::shared_ptr<EffectPass> effectPass;
-	std::shared_ptr<ConstantBufferBinding> constantBuffers;
 	std::shared_ptr<InputLayout> inputLayout;
+	std::shared_ptr<ConstantBufferBinding> constantBuffers;
 };
 
 }// namespace Pomdog
