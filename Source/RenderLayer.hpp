@@ -13,9 +13,6 @@
 #	pragma once
 #endif
 
-#include "ImageEffects/GrayscaleEffect.hpp"
-#include "ImageEffects/SepiaToneEffect.hpp"
-#include "ImageEffects/VignetteEffect.hpp"
 #include "Pomdog.Experimental/Pomdog2D.hpp"
 #include <Pomdog/Pomdog.hpp>
 

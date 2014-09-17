@@ -51,9 +51,9 @@ GameWorldLayer::GameWorldLayer(GameHost & gameHost, GameWorld & gameWorldIn)
 	: gameWorld(gameWorldIn)
 	, screenQuad(gameHost.GraphicsDevice())
 	, fxaa(gameHost.GraphicsDevice())
-	, grayscaleEffect(gameHost.GraphicsDevice(), *gameHost.AssetManager())
-	, sepiaToneEffect(gameHost.GraphicsDevice(), *gameHost.AssetManager())
-	, vignetteEffect(gameHost.GraphicsDevice(), *gameHost.AssetManager())
+	, grayscaleEffect(gameHost.GraphicsDevice())
+	, sepiaToneEffect(gameHost.GraphicsDevice())
+	, vignetteEffect(gameHost.GraphicsDevice())
 	, color(Color::CornflowerBlue)
 	, postProcessSettings{false, false, false, true}
 {
