@@ -35,6 +35,10 @@ public:
 	{
 		POMDOG_ASSERT(gameObject);
 	
+		if (actions.empty()) {
+			return;
+		}
+	
 		for (auto & action: actions) {
 			POMDOG_ASSERT(action);
 			action->Act(gameObject, frameDuration);

@@ -77,6 +77,28 @@ void PlayerCommandTranslator::Translate(DurationSeconds const& frameDuration, Ke
 //	}
 }
 
+struct ActionHelper {
+	static std::unique_ptr<MoveToAction> MoveTo(AnimationTimeInterval const& duration, Vector2 const& position)
+	{
+		return std::make_unique<MoveToAction>(duration, position);
+	}
+	
+	static std::unique_ptr<ScaleToAction> ScaleTo(AnimationTimeInterval const& duration, Vector2 const& scale)
+	{
+		return std::make_unique<ScaleToAction>(duration, scale);
+	}
+	
+	static std::unique_ptr<ScaleToAction> ScaleTo(AnimationTimeInterval const& duration, float scale)
+	{
+		return std::make_unique<ScaleToAction>(duration, Vector2{scale, scale});
+	}
+	
+	static std::unique_ptr<TintToAction> TintTo(AnimationTimeInterval const& duration, Color const& color)
+	{
+		return std::make_unique<TintToAction>(duration, color);
+	}
+};
+
 }// unnamed namespace
 //-----------------------------------------------------------------------
 MajokkoGameLevel::MajokkoGameLevel(GameHost & gameHost, Timer & gameTimerIn, GameWorld & gameWorld, Scene & scene)
@@ -226,17 +248,17 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 					
 					auto actor = enemy.Component<Actor>();
 					actor->RunAction(std::make_unique<SequenceAction>(
-						std::make_unique<TintToAction>(std::chrono::milliseconds(80), Color{140,140,140,255}),
-						std::make_unique<TintToAction>(std::chrono::milliseconds(80), Color{180,180,180,255}),
-						std::make_unique<TintToAction>(std::chrono::milliseconds(80), Color{140,140,140,255}),
-						std::make_unique<TintToAction>(std::chrono::milliseconds(80), Color::White)));
+						ActionHelper::TintTo(std::chrono::milliseconds(120), Color{170,170,170,255}),
+						ActionHelper::TintTo(std::chrono::milliseconds(110), Color{220,220,220,255}),
+						ActionHelper::TintTo(std::chrono::milliseconds(120), Color{170,170,170,255}),
+						ActionHelper::TintTo(std::chrono::milliseconds(110), Color::White)));
 					
 					auto transform = enemy.Component<Transform2D>();
 					auto originalScale = transform->Scale;
 					actor->RunAction(std::make_unique<SequenceAction>(
-						std::make_unique<ScaleToAction>(std::chrono::milliseconds(90), originalScale * Vector2{1.1f, 1.1f}),
-						std::make_unique<ScaleToAction>(std::chrono::milliseconds(90), originalScale * Vector2{0.98f, 0.98f}),
-						std::make_unique<ScaleToAction>(std::chrono::milliseconds(90), originalScale * Vector2{1.0f, 1.0f})));
+						ActionHelper::ScaleTo(std::chrono::milliseconds(90), originalScale * Vector2{1.1f, 1.1f}),
+						ActionHelper::ScaleTo(std::chrono::milliseconds(90), originalScale * Vector2{0.98f, 0.98f}),
+						ActionHelper::ScaleTo(std::chrono::milliseconds(90), originalScale * Vector2{1.0f, 1.0f})));
 
 					bullet.Destroy();
 					break;
