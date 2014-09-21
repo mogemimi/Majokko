@@ -9,6 +9,7 @@
 #include "MajokkoGameLevel.hpp"
 #include "BoundingCircle.hpp"
 #include "Breakable.hpp"
+#include "Actor.hpp"
 
 namespace Majokko {
 namespace {
@@ -222,6 +223,21 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 				{
 					auto breakable = enemy.Component<Breakable>();
 					breakable->Damage(10.0f);
+					
+					auto actor = enemy.Component<Actor>();
+					actor->RunAction(std::make_unique<SequenceAction>(
+						std::make_unique<TintToAction>(std::chrono::milliseconds(80), Color{140,140,140,255}),
+						std::make_unique<TintToAction>(std::chrono::milliseconds(80), Color{180,180,180,255}),
+						std::make_unique<TintToAction>(std::chrono::milliseconds(80), Color{140,140,140,255}),
+						std::make_unique<TintToAction>(std::chrono::milliseconds(80), Color::White)));
+					
+					auto transform = enemy.Component<Transform2D>();
+					auto originalScale = transform->Scale;
+					actor->RunAction(std::make_unique<SequenceAction>(
+						std::make_unique<ScaleToAction>(std::chrono::milliseconds(90), originalScale * Vector2{1.1f, 1.1f}),
+						std::make_unique<ScaleToAction>(std::chrono::milliseconds(90), originalScale * Vector2{0.98f, 0.98f}),
+						std::make_unique<ScaleToAction>(std::chrono::milliseconds(90), originalScale * Vector2{1.0f, 1.0f})));
+
 					bullet.Destroy();
 					break;
 				}

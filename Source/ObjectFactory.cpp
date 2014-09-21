@@ -8,6 +8,7 @@
 
 #include "ObjectFactory.hpp"
 #include "Breakable.hpp"
+#include "Actor.hpp"
 
 namespace Majokko {
 namespace {
@@ -116,6 +117,8 @@ GameObject ObjectFactory::CreateGhost(GameWorld & gameWorld, GraphicsDevice & gr
 		ghostResource = CreateGhost_Impl(graphicsDevice, assets);
 	}
 	BuildObjectByAnimatorResource(entity, graphicsDevice, *ghostResource);
+	
+	entity.AddComponent<Actor>();
 	
 	return std::move(entity);
 }

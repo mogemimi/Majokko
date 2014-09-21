@@ -7,6 +7,7 @@
 //
 
 #include "MajokkoGame.hpp"
+#include "Actor.hpp"
 #include "MajokkoGameLevel.hpp"
 #include <utility>
 
@@ -66,6 +67,11 @@ void MajokkoGame::Update()
 		POMDOG_ASSERT(particleSystem);
 		
 		particleSystem->Simulate(gameObject, gameTimer.FrameDuration());
+	}
+	
+	for (auto gameObject: gameWorld.QueryComponents<Actor>()) {
+		auto actor = gameObject.Component<Actor>();
+		actor->Act(gameObject, gameTimer.FrameDuration());
 	}
 	
 	level->Update(*gameHost, gameWorld);
