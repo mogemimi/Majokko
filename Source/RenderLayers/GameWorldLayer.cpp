@@ -1,4 +1,4 @@
-//
+﻿//
 //  Copyright (C) 2014 mogemimi.
 //
 //  Distributed under the MIT License.
@@ -6,7 +6,7 @@
 //  http://enginetrouble.net/pomdog/LICENSE.md for details.
 //
 
-#include "RenderLayer.hpp"
+#include "GameWorldLayer.hpp"
 
 namespace Majokko {
 namespace {
@@ -30,22 +30,6 @@ struct SandboxHelper {
 };
 
 }// unnamed namespace
-
-//-----------------------------------------------------------------------
-std::int32_t RenderLayer::DrawOrder() const
-{
-	return drawOrder;
-}
-//-----------------------------------------------------------------------
-void RenderLayer::DrawOrder(std::int32_t drawOrderIn)
-{
-	this->drawOrder = drawOrderIn;
-}
-
-
-
-
-
 //-----------------------------------------------------------------------
 GameWorldLayer::GameWorldLayer(GameHost & gameHost, GameWorld & gameWorldIn)
 	: gameWorld(gameWorldIn)
@@ -60,17 +44,19 @@ GameWorldLayer::GameWorldLayer(GameHost & gameHost, GameWorld & gameWorldIn)
 	auto graphicsDevice = gameHost.GraphicsDevice();
 	auto window = gameHost.Window();
 
+	auto clientBounds = window->ClientBounds();
+
 	for (auto & renderTarget: renderTargets)
 	{
 		renderTarget = std::make_shared<RenderTarget2D>(graphicsDevice,
-			window->ClientBounds().Width, window->ClientBounds().Height,
-			true, SurfaceFormat::R8G8B8A8_UNorm, DepthFormat::None);
+			clientBounds.Width, clientBounds.Height, true,
+			SurfaceFormat::R8G8B8A8_UNorm, DepthFormat::None);
 	}
 	
-	fxaa.SetViewport(window->ClientBounds().Width, window->ClientBounds().Height);
-	vignetteEffect.SetViewport(window->ClientBounds().Width, window->ClientBounds().Height);
-	sepiaToneEffect.SetViewport(window->ClientBounds().Width, window->ClientBounds().Height);
-	grayscaleEffect.SetViewport(window->ClientBounds().Width, window->ClientBounds().Height);
+	fxaa.SetViewport(clientBounds.Width, clientBounds.Height);
+	vignetteEffect.SetViewport(clientBounds.Width, clientBounds.Height);
+	sepiaToneEffect.SetViewport(clientBounds.Width, clientBounds.Height);
+	grayscaleEffect.SetViewport(clientBounds.Width, clientBounds.Height);
 
 	blendStateNonPremultiplied = BlendState::CreateNonPremultiplied(graphicsDevice);
 	blendStateAlphaBlend = BlendState::CreateAlphaBlend(graphicsDevice);
@@ -152,7 +138,6 @@ void GameWorldLayer::Draw(GraphicsContext & graphicsContext, Renderer & renderer
 		graphicsContext.SetRenderTarget(outRenderTarget);
 	}
 	
-	
 	auto blendStateOld = graphicsContext.GetBlendState();
 
 	{
@@ -177,6 +162,7 @@ void GameWorldLayer::Draw(GraphicsContext & graphicsContext, Renderer & renderer
 		const bool effectEnd = effectCount >= postProcessEffects.size();
 		if (effectEnd) {
 			graphicsContext.SetRenderTarget();
+			//input.ApplyOutputTarget(graphicsContext);
 		}
 		else {
 			graphicsContext.SetRenderTarget(outRenderTarget);
@@ -218,40 +204,5 @@ void GameWorldLayer::DrawScene(GraphicsContext & graphicsContext, Renderer & ren
 	graphicsContext.Viewport(viewport);
 	renderer.Render(graphicsContext);
 }
-
-
-
-
 //-----------------------------------------------------------------------
-void HUDLayer::Draw(GraphicsContext & graphicsContext, Renderer & renderer)
-{
-}
-
-
-
-
-
-
-//-----------------------------------------------------------------------
-void Scene::AddLayer(std::shared_ptr<RenderLayer> const& layer)
-{
-	POMDOG_ASSERT(std::end(layers) == std::find(std::begin(layers), std::end(layers), layer));
-	layers.push_back(layer);
-}
-//-----------------------------------------------------------------------
-void Scene::RemoveLayer(std::shared_ptr<RenderLayer> const& layer)
-{
-	layers.erase(std::remove(std::begin(layers), std::end(layers), layer), std::end(layers));
-}
-//-----------------------------------------------------------------------
-void Scene::SortLayers()
-{
-	std::sort(std::begin(layers), std::end(layers),
-		[](std::shared_ptr<RenderLayer> const& a, std::shared_ptr<RenderLayer> const& b){
-			return a->DrawOrder() < b->DrawOrder();
-		});
-}
-
-
-
 }// namespace Majokko

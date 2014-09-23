@@ -7,6 +7,7 @@
 //
 
 #include "MajokkoGame.hpp"
+#include "RenderLayers/HUDLayer.hpp"
 #include "Actor.hpp"
 #include "MajokkoGameLevel.hpp"
 #include <utility>
@@ -17,6 +18,7 @@ MajokkoGame::MajokkoGame(std::shared_ptr<GameHost> const& gameHostIn)
 	: gameHost(gameHostIn)
 	, graphicsContext(gameHostIn->GraphicsContext())
 	, renderer(gameHostIn->GraphicsContext(), gameHostIn->GraphicsDevice())
+	, scene(*gameHostIn->Window(), *gameHostIn->GraphicsDevice())
 	, gameTimer(*gameHostIn->Clock())
 {
 }
@@ -83,10 +85,7 @@ void MajokkoGame::Draw()
 {
 	gameEditor->BeginDraw(*graphicsContext);
 	
-	for (auto & layer: scene)
-	{
-		layer->Draw(*graphicsContext, renderer);
-	}
+	scene.Draw(*graphicsContext, renderer);
 
 	gameEditor->EndDraw(*graphicsContext);
 	graphicsContext->Present();

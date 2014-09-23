@@ -1,4 +1,4 @@
-﻿//
+//
 //  Copyright (C) 2014 mogemimi.
 //
 //  Distributed under the MIT License.
@@ -14,7 +14,8 @@
 #endif
 
 #include "ObjectFactory.hpp"
-#include "RenderLayer.hpp"
+#include "RenderLayers/Scene.hpp"
+#include "RenderLayers/RenderLayer.hpp"
 #include "Pomdog.Experimental/Pomdog2D.hpp"
 #include <Pomdog/Pomdog.hpp>
 

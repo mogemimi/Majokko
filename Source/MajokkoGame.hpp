@@ -13,7 +13,8 @@
 #	pragma once
 #endif
 
-#include "RenderLayer.hpp"
+#include "RenderLayers/RenderLayer.hpp"
+#include "RenderLayers/Scene.hpp"
 #include "Pomdog.Experimental/Pomdog2D.hpp"
 #include <Pomdog/Pomdog.hpp>
 

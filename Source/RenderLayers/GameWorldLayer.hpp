@@ -1,4 +1,4 @@
-//
+﻿//
 //  Copyright (C) 2014 mogemimi.
 //
 //  Distributed under the MIT License.
@@ -6,33 +6,20 @@
 //  http://enginetrouble.net/pomdog/LICENSE.md for details.
 //
 
-#ifndef MAJOKKO_RENDERLAYER_8C6626CA_A7B4_4220_9CE7_80DE579A9E82_HPP
-#define MAJOKKO_RENDERLAYER_8C6626CA_A7B4_4220_9CE7_80DE579A9E82_HPP
+#ifndef MAJOKKO_GAMEWORLDLAYER_E41D9D4C_6523_49BD_AB30_FC84E75C18E4_HPP
+#define MAJOKKO_GAMEWORLDLAYER_E41D9D4C_6523_49BD_AB30_FC84E75C18E4_HPP
 
 #if (_MSC_VER > 1000)
 #	pragma once
 #endif
 
+#include "RenderLayer.hpp"
 #include "Pomdog.Experimental/Pomdog2D.hpp"
 #include <Pomdog/Pomdog.hpp>
 
 namespace Majokko {
 
 using namespace Pomdog;
-
-class RenderLayer {
-public:
-	virtual ~RenderLayer() = default;
-
-	virtual void Draw(GraphicsContext & graphicsContext, Renderer & renderer) = 0;
-
-	std::int32_t DrawOrder() const;
-	void DrawOrder(std::int32_t drawOrder);
-	
-private:
-	std::int32_t drawOrder = 0;
-};
-
 
 struct PostProcessSettings {
 	bool fxaaEnabled = false;
@@ -77,42 +64,6 @@ private:
 	PostProcessSettings postProcessSettings;
 };
 
-
-
-
-class HUDLayer: public RenderLayer {
-public:
-	void Draw(GraphicsContext & graphicsContext, Renderer & renderer) override;
-	
-private:
-};
-
-
-
-
-class Scene {
-public:
-	void AddLayer(std::shared_ptr<RenderLayer> const& layer);
-	void RemoveLayer(std::shared_ptr<RenderLayer> const& layer);
-	
-	void SortLayers();
-	
-private:
-	std::vector<std::shared_ptr<RenderLayer>> layers;
-	
-public:
-	typedef decltype(layers)::iterator iterator;
-	typedef decltype(layers)::const_iterator const_iterator;
-	
-	iterator begin() { return std::begin(layers); }
-	iterator end() { return std::end(layers); };
-	const_iterator begin() const { return std::begin(layers); }
-	const_iterator end() const { return std::end(layers); };
-};
-
-
-
-
 }// namespace Majokko
 
-#endif // !defined(MAJOKKO_RENDERLAYER_8C6626CA_A7B4_4220_9CE7_80DE579A9E82_HPP)
+#endif // !defined(MAJOKKO_GAMEWORLDLAYER_E41D9D4C_6523_49BD_AB30_FC84E75C18E4_HPP)
