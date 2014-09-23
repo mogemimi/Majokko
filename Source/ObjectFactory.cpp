@@ -128,7 +128,9 @@ GameObject ObjectFactory::CreateBullet(GameWorld & gameWorld, AssetManager & ass
 {
 	auto bullet = gameWorld.CreateObject();
 	auto texture = assets.Load<Texture2D>("FireBullet.png");
-	bullet.AddComponent<SpriteRenderable>(texture);
+	auto & renderable = bullet.AddComponent<SpriteRenderable>(texture);
+	renderable.DrawOrder = 500;
+	
 	auto & transform = bullet.AddComponent<Transform2D>();
 	transform.Scale = {0.8f, 0.8f};
 	transform.Position = position;

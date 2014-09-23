@@ -200,9 +200,10 @@ void GameWorldLayer::DrawScene(GraphicsContext & graphicsContext, Renderer & ren
 		auto renderable = gameObject.Component<Renderable>();
 		renderable->Visit(gameObject, renderer, viewMatrix, projectionMatrix);
 	}
-
+	
 	graphicsContext.Viewport(viewport);
 	renderer.Render(graphicsContext);
+	renderer.Clear();
 }
 //-----------------------------------------------------------------------
 }// namespace Majokko

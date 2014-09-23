@@ -37,6 +37,7 @@ private:
 	std::shared_ptr<GraphicsContext> graphicsContext;
 	std::unique_ptr<GameLevel> level;
 	std::shared_ptr<SceneEditor::InGameEditor> gameEditor;
+	std::shared_ptr<UI::TextBlock> textBlock1;
 	Renderer renderer;
 	GameWorld gameWorld;
 	Scene scene;

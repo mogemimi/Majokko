@@ -46,6 +46,11 @@ void MajokkoGame::Initialize()
 			auto navigator = std::make_shared<UI::DebugNavigator>(gameHost->Clock());
 			stackPanel->AddChild(navigator);
 		}
+		{
+			textBlock1 = std::make_shared<UI::TextBlock>();
+			textBlock1->Text("Draw Calls: --");
+			stackPanel->AddChild(textBlock1);
+		}
 	}
 	{
 		auto bounds = gameHost->Window()->ClientBounds();
@@ -79,6 +84,7 @@ void MajokkoGame::Update()
 	level->Update(*gameHost, gameWorld);
 	gameWorld.Refresh();
 	gameEditor->Update();
+	textBlock1->Text(StringFormat("Draw Calls: %d", renderer.DrawCallCount()));
 }
 //-----------------------------------------------------------------------
 void MajokkoGame::Draw()
