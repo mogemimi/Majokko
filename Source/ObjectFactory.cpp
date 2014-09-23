@@ -119,6 +119,7 @@ GameObject ObjectFactory::CreateGhost(GameWorld & gameWorld, GraphicsDevice & gr
 	BuildObjectByAnimatorResource(entity, graphicsDevice, *ghostResource);
 	
 	entity.AddComponent<Actor>();
+	entity.AddComponent<Enemy>();
 	
 	return std::move(entity);
 }

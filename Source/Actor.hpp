@@ -42,6 +42,10 @@ public:
 		for (auto & action: actions) {
 			POMDOG_ASSERT(action);
 			action->Act(gameObject, frameDuration);
+			
+			if (!gameObject) {
+				break;
+			}
 		}
 		
 		actions.erase(std::remove_if(std::begin(actions), std::end(actions),

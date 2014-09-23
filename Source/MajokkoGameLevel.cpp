@@ -97,6 +97,17 @@ struct ActionHelper {
 	{
 		return std::make_unique<TintToAction>(duration, color);
 	}
+	
+	static std::unique_ptr<RemoveActorAction> RemoveActor()
+	{
+		return std::make_unique<RemoveActorAction>();
+	}
+	
+	template <typename...Args>
+	static std::unique_ptr<SequenceAction> Sequence(std::unique_ptr<Action> && action, Args &&... actions)
+	{
+		return std::make_unique<SequenceAction>(std::move(action), std::move(actions)...);
+	}
 };
 
 }// unnamed namespace
@@ -117,6 +128,7 @@ MajokkoGameLevel::MajokkoGameLevel(GameHost & gameHost, Timer & gameTimerIn, Gam
 		background.AddComponent<Transform2D>();
 		auto & rectangle = background.AddComponent<RectangleRenderable>();
 		Color color1 = {84-40, 133-40, 153-40, 255};
+		//Color color2 = {84-40, 133-40, 153-40, 255};
 		Color color2 = {190, 204, 207, 255};
 		rectangle.LeftTopColor(color1);
 		rectangle.RightTopColor(color1);
@@ -244,21 +256,19 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 				if (ContainmentType::Contains == entityBounds.Contains(bulletBounds))
 				{
 					auto breakable = enemy.Component<Breakable>();
+					
+					if (breakable->IsDead()) {
+						break;
+					}
+					
 					breakable->Damage(10.0f);
 					
 					auto actor = enemy.Component<Actor>();
-					actor->RunAction(std::make_unique<SequenceAction>(
+					actor->RunAction(ActionHelper::Sequence(
 						ActionHelper::TintTo(std::chrono::milliseconds(120), Color{170,170,170,255}),
 						ActionHelper::TintTo(std::chrono::milliseconds(110), Color{220,220,220,255}),
 						ActionHelper::TintTo(std::chrono::milliseconds(120), Color{170,170,170,255}),
 						ActionHelper::TintTo(std::chrono::milliseconds(110), Color::White)));
-					
-					auto transform = enemy.Component<Transform2D>();
-					auto originalScale = transform->Scale;
-					actor->RunAction(std::make_unique<SequenceAction>(
-						ActionHelper::ScaleTo(std::chrono::milliseconds(90), originalScale * Vector2{1.1f, 1.1f}),
-						ActionHelper::ScaleTo(std::chrono::milliseconds(90), originalScale * Vector2{0.98f, 0.98f}),
-						ActionHelper::ScaleTo(std::chrono::milliseconds(90), originalScale * Vector2{1.0f, 1.0f})));
 
 					bullet.Destroy();
 					break;
@@ -273,9 +283,29 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 		{
 			auto breakable = entity.Component<Breakable>();
 			breakable->ApplyDamage();
-			
-			if (breakable->IsDead()) {
-				entity.Destroy();
+
+			if (breakable->IsDead())
+			{
+				auto enemy = entity.Component<Enemy>();
+				
+				if (enemy->State == EnemyState::Dead) {
+					continue;
+				}
+				
+				auto actor = entity.Component<Actor>();
+
+				auto transform = entity.Component<Transform2D>();
+				auto originalScale = transform->Scale;
+				actor->RunAction(ActionHelper::Sequence(
+					ActionHelper::ScaleTo(std::chrono::milliseconds(90), originalScale * Vector2{1.1f, 1.1f}),
+					ActionHelper::ScaleTo(std::chrono::milliseconds(70), originalScale * Vector2{0.96f, 0.96f}),
+					ActionHelper::ScaleTo(std::chrono::milliseconds(110), originalScale * Vector2{1.2f, 1.2f})));
+				
+				actor->RunAction(ActionHelper::Sequence(
+					ActionHelper::TintTo(std::chrono::milliseconds(320), Color{170,170,170,0}),
+					ActionHelper::RemoveActor()));
+				
+				enemy->State = EnemyState::Dead;
 			}
 		}
 	};
@@ -329,13 +359,14 @@ void MajokkoGameLevel::UpdatePlayerInput(GameHost & gameHost, GameWorld & gameWo
 			movable->Velocity = Vector2::Zero;
 		}
 		else if (args.Is<GameCommandShot>()) {
-			constexpr DurationSeconds castingTime = std::chrono::milliseconds(55);
+			constexpr DurationSeconds castingTime = std::chrono::milliseconds(95);
 			
 			if (castingTimer.TotalTime() >= castingTime)
 			{
 				auto assets = gameHost.AssetManager();
 				auto position = littleWitch.Component<Transform2D>()->Position + Vector2{50.0f, 30.0f};
-				auto bullet = factory.CreateBullet(gameWorld, *assets, position);
+				factory.CreateBullet(gameWorld, *assets, position + Vector2{0.0f, 8.0f});
+				factory.CreateBullet(gameWorld, *assets, position + Vector2{0.0f, -8.0f});
 				
 				castingTimer.Reset();
 			}

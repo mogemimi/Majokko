@@ -1,4 +1,4 @@
-﻿//
+//
 //  Copyright (C) 2014 mogemimi.
 //
 //  Distributed under the MIT License.
@@ -46,6 +46,21 @@ class Collider2D: public Component<Collider2D> {
 public:
 	BoundingCircle Bounds;
 };
+
+enum class EnemyState: std::uint8_t {
+	Running,
+	Dead,
+};
+
+class Enemy: public Component<Enemy> {
+public:
+	EnemyState State = EnemyState::Running;
+};
+
+
+//Miniboss
+//Superboss
+//FinalBoss
 
 }// namespace Majokko
 
