@@ -13,13 +13,7 @@ namespace Majokko {
 //-----------------------------------------------------------------------
 Scene::Scene(GameWindow const& window, GraphicsDevice & graphicsDevice)
 	: dirtyFlag(true)
-{
-	auto const clientBounds = window.ClientBounds();
-	
-	renderTarget = std::make_shared<RenderTarget2D>(graphicsDevice,
-		clientBounds.Width, clientBounds.Height, true,
-		SurfaceFormat::R8G8B8A8_UNorm, DepthFormat::None);
-}
+{}
 //-----------------------------------------------------------------------
 void Scene::AddLayer(std::shared_ptr<RenderLayer> const& layer)
 {
@@ -49,7 +43,6 @@ void Scene::Draw(GraphicsContext & graphicsContext, Renderer & renderer)
 		dirtyFlag = false;
 	}
 
-	graphicsContext.SetRenderTarget(renderTarget);
 	graphicsContext.Clear(Color::CornflowerBlue);
 
 	for (auto & layer: layers)
@@ -57,8 +50,6 @@ void Scene::Draw(GraphicsContext & graphicsContext, Renderer & renderer)
 		POMDOG_ASSERT(layer);
 		layer->Draw(graphicsContext, renderer);
 	}
-	
-	graphicsContext.SetRenderTarget();
 }
 //-----------------------------------------------------------------------
 }// namespace Majokko

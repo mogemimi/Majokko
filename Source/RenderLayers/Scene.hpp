@@ -36,7 +36,6 @@ private:
 	
 private:
 	std::vector<std::shared_ptr<RenderLayer>> layers;
-	std::shared_ptr<RenderTarget2D> renderTarget;
 	bool dirtyFlag;
 };
 
