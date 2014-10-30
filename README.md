@@ -54,19 +54,19 @@ git checkout -b gamedev origin/gamedev
 **1. Generating the Xcode project file**
 
 ```bash
-gyp Build/app.gyp --depth=. -f xcode --generator-output=./build.xcodefiles/
+gyp Build/Majokko.gyp --depth=. -f xcode --generator-output=./build.xcodefiles/
 ```
 
 **2. Building (Release/Debug)**
 
 ```
-xcodebuild -project build.xcodefiles/Build/app.xcodeproj
+xcodebuild -project build.xcodefiles/Build/Majokko.xcodeproj
 ```
 
 To build in release mode, use `-configuration` option:
 
 ```bash
-xcodebuild -project build.xcodefiles/Build/app.xcodeproj -configuration Release
+xcodebuild -project build.xcodefiles/Build/Majokko.xcodeproj -configuration Release
 ```
 
 **3. Running app**
