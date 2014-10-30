@@ -63,7 +63,7 @@
     'include_dirs': [
       '<@(pomdog_framework_dir)/include',
       '<@(pomdog_framework_dir)/experimental',
-      '<@(pomdog_framework_dir)/third_party/rapidjson/include',
+      '<@(pomdog_framework_dir)/third-party/rapidjson/include',
     ],
     'conditions': [
       ['component == "shared_library"', {
