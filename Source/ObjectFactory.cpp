@@ -56,7 +56,7 @@ static SkinnedMeshAnimatorResource CreateGhost_Impl(
 }
 //-----------------------------------------------------------------------
 static void BuildObjectByAnimatorResource(GameObject & gameObject,
-	GraphicsDevice & graphicsDevice, SkinnedMeshAnimatorResource const& resource)
+	SkinnedMeshAnimatorResource const& resource)
 {
 	auto skeletonTransform = std::make_shared<SkeletonTransform>();
 	skeletonTransform->Pose = SkeletonPose::CreateBindPose(*resource.Skeleton);
@@ -64,7 +64,7 @@ static void BuildObjectByAnimatorResource(GameObject & gameObject,
 	gameObject.AddComponent(std::make_unique<Animator>(resource.Skeleton, skeletonTransform, resource.AnimationGraph));
 
 	gameObject.AddComponent(std::make_unique<SkinnedMeshRenderable>(
-		graphicsDevice, resource.Skeleton, skeletonTransform, resource.Mesh, resource.Texture));
+		resource.Skeleton, skeletonTransform, resource.Mesh, resource.Texture));
 }
 
 }// unnamed namespace
@@ -89,7 +89,7 @@ GameObject ObjectFactory::CreateLittleWitch(GameWorld & gameWorld, GraphicsDevic
 	if (!littleWitchResource) {
 		littleWitchResource = CreateLittleWicth_Impl(graphicsDevice, assets);
 	}
-	BuildObjectByAnimatorResource(entity, graphicsDevice, *littleWitchResource);
+	BuildObjectByAnimatorResource(entity, *littleWitchResource);
 
 	return std::move(entity);
 }
@@ -116,7 +116,7 @@ GameObject ObjectFactory::CreateGhost(GameWorld & gameWorld, GraphicsDevice & gr
 	if (!ghostResource) {
 		ghostResource = CreateGhost_Impl(graphicsDevice, assets);
 	}
-	BuildObjectByAnimatorResource(entity, graphicsDevice, *ghostResource);
+	BuildObjectByAnimatorResource(entity, *ghostResource);
 	
 	entity.AddComponent<Actor>();
 	entity.AddComponent<Enemy>();

@@ -103,6 +103,7 @@ void GameWorldLayer::Draw(GraphicsContext & graphicsContext, Renderer & renderer
 		postProcessEffects.push_back([&](std::shared_ptr<RenderTarget2D> const& sourceTexture) {
 			graphicsContext.Clear(Color::CornflowerBlue);
 			vignetteEffect.SetTexture(sourceTexture);
+			vignetteEffect.SetIntensity(0.4f);
 			vignetteEffect.Apply(graphicsContext);
 			screenQuad.DrawQuad(graphicsContext);
 			graphicsContext.SetTexture(0);

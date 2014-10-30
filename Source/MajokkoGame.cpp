@@ -10,6 +10,10 @@
 #include "RenderLayers/HUDLayer.hpp"
 #include "Actor.hpp"
 #include "MajokkoGameLevel.hpp"
+#include "Pomdog.Experimental/Rendering/Processors/ParticleBatchCommandProcessor.hpp"
+#include "Pomdog.Experimental/Rendering/Processors/PrimitiveCommandProcessor.hpp"
+#include "Pomdog.Experimental/Rendering/Processors/SkinnedMeshCommandProcessor.hpp"
+#include "Pomdog.Experimental/Rendering/Processors/SpriteCommandProcessor.hpp"
 #include <utility>
 
 namespace Majokko {
@@ -55,6 +59,19 @@ void MajokkoGame::Initialize()
 	{
 		auto bounds = gameHost->Window()->ClientBounds();
 		gameEditor->SetViewProjection(Matrix4x4::CreateOrthographicLH(bounds.Width, bounds.Height, 0.1f, 100.0f));
+	}
+	{
+		renderer.AddProcessor(typeid(Details::Rendering::ParticleBatchCommand),
+			std::make_unique<ParticleBatchCommandProcessor>(graphicsContext, graphicsDevice));
+		
+		renderer.AddProcessor(typeid(Details::Rendering::PrimitiveCommand),
+			std::make_unique<PrimitiveCommandProcessor>(graphicsContext, graphicsDevice));
+		
+		renderer.AddProcessor(typeid(Details::Rendering::SkinnedMeshCommand),
+			std::make_unique<SkinnedMeshCommandProcessor>(graphicsContext, graphicsDevice));
+		
+		renderer.AddProcessor(typeid(Details::Rendering::SpriteCommand),
+			std::make_unique<SpriteCommandProcessor>(graphicsContext, graphicsDevice));
 	}
 }
 //-----------------------------------------------------------------------
