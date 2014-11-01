@@ -57,10 +57,6 @@ void MajokkoGame::Initialize()
 		}
 	}
 	{
-		auto bounds = gameHost->Window()->ClientBounds();
-		gameEditor->SetViewProjection(Matrix4x4::CreateOrthographicLH(bounds.Width, bounds.Height, 0.1f, 100.0f));
-	}
-	{
 		renderer.AddProcessor(typeid(Details::Rendering::ParticleBatchCommand),
 			std::make_unique<ParticleBatchCommandProcessor>(graphicsContext, graphicsDevice));
 		
@@ -106,11 +102,9 @@ void MajokkoGame::Update()
 //-----------------------------------------------------------------------
 void MajokkoGame::Draw()
 {
-	gameEditor->BeginDraw(*graphicsContext);
-	
 	scene.Draw(*graphicsContext, renderer);
 
-	gameEditor->EndDraw(*graphicsContext);
+	gameEditor->DrawGUI(*graphicsContext);
 	graphicsContext->Present();
 }
 //-----------------------------------------------------------------------
