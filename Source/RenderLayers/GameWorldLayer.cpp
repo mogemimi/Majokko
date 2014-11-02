@@ -196,10 +196,10 @@ void GameWorldLayer::DrawScene(GraphicsContext & graphicsContext, Renderer & ren
 	renderer.ViewMatrix(viewMatrix);
 	renderer.ProjectionMatrix(projectionMatrix);
 
-	for (auto & gameObject: gameWorld.QueryComponents<Renderable, Transform2D>())
+	for (auto & gameObject: gameWorld.QueryComponents<Renderable>())
 	{
 		auto renderable = gameObject.Component<Renderable>();
-		renderable->Visit(gameObject, renderer, viewMatrix, projectionMatrix);
+		renderable->Visit(gameObject, renderer);
 	}
 	
 	graphicsContext.Viewport(viewport);
