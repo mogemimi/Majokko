@@ -14,9 +14,7 @@
 #endif
 
 #include "ObjectFactory.hpp"
-#include "RenderLayers/Scene.hpp"
-#include "RenderLayers/RenderLayer.hpp"
-#include "Pomdog.Experimental/Pomdog2D.hpp"
+#include "Pomdog.Experimental/Experimental.hpp"
 #include <Pomdog/Pomdog.hpp>
 
 namespace Majokko {
@@ -25,7 +23,7 @@ using namespace Pomdog;
 
 class MajokkoGameLevel: public GameLevel {
 public:
-	MajokkoGameLevel(GameHost & gameHost, Timer & gameTimer, GameWorld & gameWorld, Scene & scene);
+	MajokkoGameLevel(GameHost & gameHost, Timer & gameTimer, GameWorld & gameWorld, RenderLayerCompositor & compositor);
 
 	void Update(GameHost & gameHost, GameWorld & gameWorld) override;
 	

@@ -13,8 +13,7 @@
 #	pragma once
 #endif
 
-#include "RenderLayer.hpp"
-#include "Pomdog.Experimental/Pomdog2D.hpp"
+#include "Pomdog.Experimental/Compositing/RenderLayer.hpp"
 #include <Pomdog/Pomdog.hpp>
 
 namespace Majokko {

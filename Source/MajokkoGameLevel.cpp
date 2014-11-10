@@ -113,7 +113,7 @@ struct ActionHelper {
 
 }// unnamed namespace
 //-----------------------------------------------------------------------
-MajokkoGameLevel::MajokkoGameLevel(GameHost & gameHost, Timer & gameTimerIn, GameWorld & gameWorld, Scene & scene)
+MajokkoGameLevel::MajokkoGameLevel(GameHost & gameHost, Timer & gameTimerIn, GameWorld & gameWorld, RenderLayerCompositor & compositor)
 	: gameTimer(gameTimerIn)
 	, spawnTimer(*gameHost.Clock())
 	, castingTimer(*gameHost.Clock())
@@ -157,7 +157,7 @@ MajokkoGameLevel::MajokkoGameLevel(GameHost & gameHost, Timer & gameTimerIn, Gam
 	{
 		auto layer = std::make_shared<GameWorldLayer>(gameHost, gameWorld);
 		layer->Camera(mainCamera);
-		scene.AddLayer(layer);
+		compositor.AddLayer(layer);
 	}
 //	{
 //		constexpr float timeScale = 0.3f;

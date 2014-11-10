@@ -22,7 +22,6 @@ MajokkoGame::MajokkoGame(std::shared_ptr<GameHost> const& gameHostIn)
 	: gameHost(gameHostIn)
 	, graphicsContext(gameHostIn->GraphicsContext())
 	, renderer(gameHostIn->GraphicsContext(), gameHostIn->GraphicsDevice())
-	, scene(*gameHostIn->Window(), *gameHostIn->GraphicsDevice())
 	, gameTimer(*gameHostIn->Clock())
 {
 }
@@ -36,8 +35,8 @@ void MajokkoGame::Initialize()
 	auto graphicsDevice = gameHost->GraphicsDevice();
 	auto assets = gameHost->AssetManager();
 	
-	level = std::make_unique<MajokkoGameLevel>(*gameHost, gameTimer, gameWorld, scene);
-	scene.AddLayer(std::make_shared<HUDLayer>());
+	level = std::make_unique<MajokkoGameLevel>(*gameHost, gameTimer, gameWorld, compositor);
+	compositor.AddLayer(std::make_shared<HUDLayer>());
 	
 	{
 		gameEditor = std::make_unique<SceneEditor::InGameEditor>(gameHost);
@@ -102,7 +101,7 @@ void MajokkoGame::Update()
 //-----------------------------------------------------------------------
 void MajokkoGame::Draw()
 {
-	scene.Draw(*graphicsContext, renderer);
+	compositor.Draw(*graphicsContext, renderer);
 
 	gameEditor->DrawGUI(*graphicsContext);
 	graphicsContext->Present();

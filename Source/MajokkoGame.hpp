@@ -13,9 +13,7 @@
 #	pragma once
 #endif
 
-#include "RenderLayers/RenderLayer.hpp"
-#include "RenderLayers/Scene.hpp"
-#include "Pomdog.Experimental/Pomdog2D.hpp"
+#include "Pomdog.Experimental/Experimental.hpp"
 #include <Pomdog/Pomdog.hpp>
 
 namespace Majokko {
@@ -40,7 +38,7 @@ private:
 	std::shared_ptr<UI::TextBlock> textBlock1;
 	Renderer renderer;
 	GameWorld gameWorld;
-	Scene scene;
+	RenderLayerCompositor compositor;
 	Timer gameTimer;
 };
 
