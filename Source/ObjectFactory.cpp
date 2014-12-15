@@ -18,15 +18,15 @@ static SkinnedMeshAnimatorResource CreateLittleWicth_Impl(
 {
 	SkinnedMeshAnimatorResource resource;
 	
-	auto skeletonDesc = assets.Load<Details::Spine::SkeletonDesc>("Majokko.Spine/Majokko.json");
-	resource.Skeleton = std::make_shared<Skeleton>(Details::Spine::CreateSkeleton(skeletonDesc.Bones));
-	resource.AnimationGraph = Details::Spine::LoadAnimationGraph(skeletonDesc, assets, "Majokko.Spine/AnimGraph.json");
+	auto skeletonDesc = Spine::SkeletonDescLoader::Load(assets, "Majokko.Spine/Majokko.json");
+	resource.Skeleton = std::make_shared<Skeleton>(Spine::CreateSkeleton(skeletonDesc.Bones));
+	resource.AnimationGraph = Spine::LoadAnimationGraph(skeletonDesc, assets, "Majokko.Spine/AnimGraph.json");
 
-	auto textureAtlas = assets.Load<Details::TexturePacker::TextureAtlas>("Majokko.Spine/Majokko.atlas");
+	auto textureAtlas = TexturePacker::TextureAtlasLoader::Load(assets, "Majokko.Spine/Majokko.atlas");
 	resource.Texture = assets.Load<Texture2D>("Majokko.Spine/Majokko.png");
 
 	auto bindPose = SkeletonPose::CreateBindPose(*resource.Skeleton);
-	resource.Mesh = std::make_shared<SkinnedMesh>(Details::Spine::CreateSkinnedMesh(graphicsDevice,
+	resource.Mesh = std::make_shared<SkinnedMesh>(Spine::CreateSkinnedMesh(graphicsDevice,
 		SkeletonHelper::ToGlobalPose(*resource.Skeleton, bindPose),
 		skeletonDesc, textureAtlas,
 		Vector2(resource.Texture->Width(), resource.Texture->Height()), "default"));
@@ -39,15 +39,15 @@ static SkinnedMeshAnimatorResource CreateGhost_Impl(
 {
 	SkinnedMeshAnimatorResource resource;
 	
-	auto skeletonDesc = assets.Load<Details::Spine::SkeletonDesc>("Ghost.Spine/Ghost.json");
-	resource.Skeleton = std::make_shared<Skeleton>(Details::Spine::CreateSkeleton(skeletonDesc.Bones));
-	resource.AnimationGraph = Details::Spine::LoadAnimationGraph(skeletonDesc, assets, "Ghost.Spine/AnimGraph.json");
+	auto skeletonDesc = Spine::SkeletonDescLoader::Load(assets, "Ghost.Spine/Ghost.json");
+	resource.Skeleton = std::make_shared<Skeleton>(Spine::CreateSkeleton(skeletonDesc.Bones));
+	resource.AnimationGraph = Spine::LoadAnimationGraph(skeletonDesc, assets, "Ghost.Spine/AnimGraph.json");
 
-	auto textureAtlas = assets.Load<Details::TexturePacker::TextureAtlas>("Ghost.Spine/Ghost.atlas");
+	auto textureAtlas = TexturePacker::TextureAtlasLoader::Load(assets, "Ghost.Spine/Ghost.atlas");
 	resource.Texture = assets.Load<Texture2D>("Ghost.Spine/Ghost.png");
 
 	auto bindPose = SkeletonPose::CreateBindPose(*resource.Skeleton);
-	resource.Mesh = std::make_shared<SkinnedMesh>(Details::Spine::CreateSkinnedMesh(graphicsDevice,
+	resource.Mesh = std::make_shared<SkinnedMesh>(Spine::CreateSkinnedMesh(graphicsDevice,
 		SkeletonHelper::ToGlobalPose(*resource.Skeleton, bindPose),
 		skeletonDesc, textureAtlas,
 		Vector2(resource.Texture->Width(), resource.Texture->Height()), "default"));

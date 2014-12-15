@@ -14,6 +14,7 @@
 #endif
 
 #include "Pomdog.Experimental/Compositing/RenderLayer.hpp"
+#include <Pomdog.Experimental/Experimental.hpp>
 #include <Pomdog/Pomdog.hpp>
 
 namespace Majokko {
