@@ -9,7 +9,7 @@
 #import "AppDelegate.h"
 
 #include "MajokkoGame.hpp"
-#include <Pomdog/Application/detail/Platform.Cocoa/BootstrapperCocoa.hpp>
+#include <Pomdog/Platform/Cocoa/BootstrapperCocoa.hpp>
 #include <Pomdog/Pomdog.hpp>
 #include <iostream>
 

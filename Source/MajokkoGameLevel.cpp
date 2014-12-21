@@ -399,7 +399,7 @@ void MajokkoGameLevel::UpdatePlayerInput(GameHost & gameHost, GameWorld & gameWo
 	}
 
 	auto keyboard = gameHost.Keyboard();
-	auto & keyboardState = keyboard->State();
+	auto keyboardState = keyboard->GetState();
 	
 	static PlayerCommandTranslator translator;
 	translator.Translate(gameTimer.FrameDuration(), keyboardState, eventQueue);
