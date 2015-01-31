@@ -14,6 +14,7 @@
 #endif
 
 #include "../BoundingCircle.hpp"
+#include <Pomdog.Experimental/Experimental.hpp>
 #include <Pomdog/Pomdog.hpp>
 
 namespace Majokko {

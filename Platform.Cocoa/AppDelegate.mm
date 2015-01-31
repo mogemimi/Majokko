@@ -1,33 +1,27 @@
-//
-//  Copyright (C) 2014 mogemimi.
-//
-//  Distributed under the MIT License.
-//  See accompanying file LICENSE.md or copy at
-//  http://enginetrouble.net/pomdog/LICENSE.md for details.
-//
-
-#import "AppDelegate.h"
-
-#include "MajokkoGame.hpp"
-#include <Pomdog/Platform/Cocoa/BootstrapperCocoa.hpp>
-#include <Pomdog/Pomdog.hpp>
+﻿#import "AppDelegate.h"
+#include "../Source/MajokkoGame.hpp"
+#include "Pomdog/Platform/Cocoa/BootstrapperCocoa.hpp"
+#include "Pomdog/Pomdog.hpp"
 #include <iostream>
 #include <thread>
 
-using Pomdog::GameHost;
-using Pomdog::Log;
-using Pomdog::LogEntry;
-using Pomdog::LogLevel;
-using Pomdog::ScopedConnection;
+@interface AppDelegate ()
+
+@property (weak) IBOutlet NSWindow *window;
+@end
 
 @implementation AppDelegate
 {
-	ScopedConnection connection;
+	Pomdog::ScopedConnection connection;
 	std::thread gameRunThread;
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
+	using Pomdog::Log;
+	using Pomdog::LogEntry;
+	using Pomdog::LogLevel;
+
 #ifdef DEBUG
 	connection = Log::Connect([](Pomdog::LogEntry const& entry) {
 		//NSString* log = [NSString stringWithUTF8String:entry.Message.c_str()];
@@ -41,25 +35,27 @@ using Pomdog::ScopedConnection;
 
 	[[self window] makeKeyAndOrderFront:self];
 
-	gameRunThread = std::thread([self] {
-		using Pomdog::Details::Cocoa::BootstrapperCocoa;
+	gameRunThread = std::thread([self]
+	{
+		try {
+			using Bootstrap = Pomdog::Details::Cocoa::BootstrapperCocoa;
+			auto gameHost = Bootstrap().CreateGameHost([self window]);
 
-		BootstrapperCocoa bootstrapper;
-		bootstrapper.Run([self window], [](std::shared_ptr<GameHost> const& gameHost) {
-			try {
-				Majokko::MajokkoGame game{gameHost};
-				gameHost->Run(game);
-			}
-			catch (std::exception const& e) {
-				Log::Critical("Pomdog", e.what());
-			}
-		});
-		
+			Majokko::MajokkoGame game{gameHost};
+			gameHost->Run(game);
+		}
+		catch (std::exception const& e) {
+			Log::Critical("Pomdog", e.what());
+		}
+
 		// Shutdown your application
 		[NSApp terminate:nil];
 	});
 
 	Log::Verbose("game mainloop thread run");
+}
+
+- (void)applicationWillTerminate:(NSNotification *)aNotification {
 }
 
 @end

@@ -21,7 +21,6 @@ namespace Majokko {
 MajokkoGame::MajokkoGame(std::shared_ptr<GameHost> const& gameHostIn)
 	: gameHost(gameHostIn)
 	, graphicsContext(gameHostIn->GraphicsContext())
-	, renderer(gameHostIn->GraphicsContext(), gameHostIn->GraphicsDevice())
 	, gameTimer(*gameHostIn->Clock())
 {
 }
@@ -63,7 +62,7 @@ void MajokkoGame::Initialize()
 			std::make_unique<PrimitiveCommandProcessor>(graphicsContext, graphicsDevice));
 		
 		renderer.AddProcessor(typeid(Details::Rendering::SkinnedMeshCommand),
-			std::make_unique<SkinnedMeshCommandProcessor>(graphicsContext, graphicsDevice));
+			std::make_unique<SkinnedMeshCommandProcessor>(graphicsDevice));
 		
 		renderer.AddProcessor(typeid(Details::Rendering::SpriteCommand),
 			std::make_unique<SpriteCommandProcessor>(graphicsContext, graphicsDevice));

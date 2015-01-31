@@ -1,21 +1,5 @@
-# Examples(Xcode):
-# gyp build/app.gyp --depth=. -f xcode --generator-output=./build.xcodefiles/
-#
-# Examples(MSVS 2013):
-# gyp build/app.gyp --depth=. -f msvs -G msvs_version=2013 --generator-output=./build.msvc/
-
 {
-  'includes': [
-    'common.gypi',
-    '../pomdog/build/experimental.gypi',
-  ],
-  'variables': {
-    'pomdog_framework_dir': '../pomdog',
-  },
-  'make_global_settings': [
-    ['CXX','/usr/bin/clang++'],
-    ['LINK','/usr/bin/clang++'],
-  ],
+  'includes': ['common.gypi'],
   'target_defaults': {
     'configurations': {
       'Debug': {
@@ -34,8 +18,8 @@
     'xcode_settings': {
       'GCC_VERSION': 'com.apple.compilers.llvm.clang.1_0',
       'CLANG_CXX_LANGUAGE_STANDARD': 'c++14',
-      'MACOSX_DEPLOYMENT_TARGET': '10.9', # OS X Deployment Target: 10.9
-      'CLANG_CXX_LIBRARY': 'libc++', # libc++ requires OS X 10.7 or later
+      'MACOSX_DEPLOYMENT_TARGET': '10.9',
+      'CLANG_CXX_LIBRARY': 'libc++',
 	  #'SKIP_INSTALL': 'NO',
       # Warnings:
       'CLANG_WARN_EMPTY_BODY': 'YES',
@@ -61,34 +45,31 @@
       'GCC_TREAT_WARNINGS_AS_ERRORS': 'YES',
     },
     'include_dirs': [
-      '<@(pomdog_framework_dir)/include',
-      '<@(pomdog_framework_dir)/experimental',
-      '<@(pomdog_framework_dir)/third-party/rapidjson/include',
+      '../pomdog/experimental',
+      '../pomdog/include',
+    ],
+    'dependencies': [
+      '../pomdog/build/experimental.gyp:pomdog_experimental',
     ],
     'conditions': [
       ['component == "shared_library"', {
         'dependencies': [
-          '<@(pomdog_framework_dir)/build/pomdog.gyp:pomdog-shared',
+          '../pomdog/build/pomdog.gyp:pomdog-shared',
         ],
         'defines': [
           'POMDOG_USING_LIBRARY_EXPORTS=1',
         ],
       }, {
         'dependencies': [
-          '<@(pomdog_framework_dir)/build/pomdog.gyp:pomdog-static',
+          '../pomdog/build/pomdog.gyp:pomdog-static',
         ],
       }],
-      ['OS == "win"', {
-          'sources': [
-          ],
-      }], # OS == "win"
       ['OS == "mac"', {
-          'link_settings': {
-            'libraries': [
-              '$(SDKROOT)/System/Library/Frameworks/Cocoa.framework',
-              '$(SDKROOT)/System/Library/Frameworks/OpenGL.framework',
-            ],
-          },
+        'link_settings': {
+          'libraries': [
+            '$(SDKROOT)/System/Library/Frameworks/Cocoa.framework',
+          ],
+        },
       }], # OS == "mac"
     ],
   },
@@ -99,7 +80,6 @@
       'type': 'executable',
       'mac_bundle': 1,
       'sources': [
-        '<@(pomdog_experimental_2d_sources)',
         '../Source/Actor.hpp',
         '../Source/BoundingCircle.cpp',
         '../Source/BoundingCircle.hpp',
@@ -124,7 +104,7 @@
         ['OS == "mac"', {
           'sources': [
             '../Platform.Cocoa/main.mm',
-            '../Platform.Cocoa/Majokko-Prefix.pch',
+            '../Platform.Cocoa/Prefix.pch',
             '../Platform.Cocoa/AppDelegate.h',
             '../Platform.Cocoa/AppDelegate.mm',
           ],
@@ -142,13 +122,13 @@
       'mac_bundle_resources': [
         '../Platform.Cocoa/Base.lproj/MainMenu.xib',
         '../Platform.Cocoa/English.lproj/InfoPlist.strings',
-        #'../Platform.Cocoa/Images.xcassets/',
+        '../Platform.Cocoa/Images.xcassets/',
         '../Content/',
       ],
       'xcode_settings': {
-        'INFOPLIST_FILE': '../Platform.Cocoa/Majokko-Info.plist',
+        'INFOPLIST_FILE': '../Platform.Cocoa/Info.plist',
         'CLANG_ENABLE_OBJC_ARC': 'YES',
       },
     },
-  ],# "targets"
+  ],
 }
