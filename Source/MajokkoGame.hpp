@@ -1,4 +1,4 @@
-﻿//
+//
 //  Copyright (C) 2014 mogemimi.
 //
 //  Distributed under the MIT License.
@@ -10,7 +10,7 @@
 #define MAJOKKOGAME_HPP
 
 #if (_MSC_VER > 1000)
-#	pragma once
+#    pragma once
 #endif
 
 #include "Pomdog.Experimental/Experimental.hpp"
@@ -22,24 +22,24 @@ using namespace Pomdog;
 
 class MajokkoGame: public Game {
 public:
-	explicit MajokkoGame(std::shared_ptr<GameHost> const& gameHost);
+    explicit MajokkoGame(std::shared_ptr<GameHost> const& gameHost);
 
-	void Initialize() override;
+    void Initialize() override;
 
-	void Update() override;
+    void Update() override;
 
-	void Draw() override;
-		
+    void Draw() override;
+
 private:
-	std::shared_ptr<GameHost> gameHost;
-	std::shared_ptr<GraphicsContext> graphicsContext;
-	std::unique_ptr<GameLevel> level;
-	std::shared_ptr<SceneEditor::InGameEditor> gameEditor;
-	std::shared_ptr<UI::TextBlock> textBlock1;
-	Renderer renderer;
-	GameWorld gameWorld;
-	RenderLayerCompositor compositor;
-	Timer gameTimer;
+    std::shared_ptr<GameHost> gameHost;
+    std::shared_ptr<GraphicsContext> graphicsContext;
+    std::unique_ptr<GameLevel> level;
+    std::shared_ptr<SceneEditor::InGameEditor> gameEditor;
+    std::shared_ptr<UI::TextBlock> textBlock1;
+    Renderer renderer;
+    GameWorld gameWorld;
+    RenderLayerCompositor compositor;
+    Timer gameTimer;
 };
 
 }// namespace Majokko

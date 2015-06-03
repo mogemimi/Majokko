@@ -1,4 +1,4 @@
-﻿//
+//
 //  Copyright (C) 2014 mogemimi.
 //
 //  Distributed under the MIT License.
@@ -12,19 +12,19 @@ namespace Majokko {
 
 bool Breakable::IsDead() const
 {
-	return this->Health <= 0.0f;
+    return this->Health <= 0.0f;
 }
 
 void Breakable::ApplyDamage()
 {
-	Health -= TotalDamage;
-	TotalDamage = 0.0f;
+    Health -= TotalDamage;
+    TotalDamage = 0.0f;
 }
 
 void Breakable::Damage(float damage)
 {
-	POMDOG_ASSERT(damage >= 0.0f);
-	TotalDamage += damage;
+    POMDOG_ASSERT(damage >= 0.0f);
+    TotalDamage += damage;
 }
 
 }// namespace Majokko

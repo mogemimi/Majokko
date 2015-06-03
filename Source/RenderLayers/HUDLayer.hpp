@@ -1,4 +1,4 @@
-﻿//
+//
 //  Copyright (C) 2014 mogemimi.
 //
 //  Distributed under the MIT License.
@@ -10,7 +10,7 @@
 #define MAJOKKO_HUDLAYER_EAB71C38_2316_4C5A_A5B2_1B75765C19CC_HPP
 
 #if (_MSC_VER > 1000)
-#	pragma once
+#    pragma once
 #endif
 
 #include "Pomdog.Experimental/Compositing/RenderLayer.hpp"
@@ -22,8 +22,8 @@ using namespace Pomdog;
 
 class HUDLayer: public RenderLayer {
 public:
-	void Draw(GraphicsContext & graphicsContext, Renderer & renderer) override;
-	
+    void Draw(GraphicsContext & graphicsContext, Renderer & renderer) override;
+
 private:
 };
 
