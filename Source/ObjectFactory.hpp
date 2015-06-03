@@ -9,10 +9,6 @@
 #ifndef MAJOKKO_OBJECTFACTORY_32F71A3D_0A8A_44D6_9AE6_FDBC4C91E7C1_HPP
 #define MAJOKKO_OBJECTFACTORY_32F71A3D_0A8A_44D6_9AE6_FDBC4C91E7C1_HPP
 
-#if (_MSC_VER > 1000)
-#    pragma once
-#endif
-
 #include "Pomdog.Experimental/Experimental.hpp"
 #include <Pomdog/Pomdog.hpp>
 
@@ -43,6 +39,6 @@ private:
     Optional<SkinnedMeshAnimatorResource> ghostResource;
 };
 
-}// namespace Majokko
+} // namespace Majokko
 
 #endif // !defined(MAJOKKO_OBJECTFACTORY_32F71A3D_0A8A_44D6_9AE6_FDBC4C91E7C1_HPP)

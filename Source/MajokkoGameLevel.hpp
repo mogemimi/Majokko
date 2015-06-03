@@ -9,10 +9,6 @@
 #ifndef MAJOKKO_MAJOKKOGAMELEVEL_5BBC9870_D2E1_4A31_B706_4DA15C161CFF_HPP
 #define MAJOKKO_MAJOKKOGAMELEVEL_5BBC9870_D2E1_4A31_B706_4DA15C161CFF_HPP
 
-#if (_MSC_VER > 1000)
-#    pragma once
-#endif
-
 #include "ObjectFactory.hpp"
 #include "Pomdog.Experimental/Experimental.hpp"
 #include <Pomdog/Pomdog.hpp>
@@ -39,6 +35,6 @@ private:
     Timer castingTimer;
 };
 
-}// namespace Majokko
+} // namespace Majokko
 
 #endif // !defined(MAJOKKO_MAJOKKOGAMELEVEL_5BBC9870_D2E1_4A31_B706_4DA15C161CFF_HPP)

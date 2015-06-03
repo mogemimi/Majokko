@@ -28,8 +28,8 @@ MajokkoGame::MajokkoGame(std::shared_ptr<GameHost> const& gameHostIn)
 void MajokkoGame::Initialize()
 {
     auto window = gameHost->Window();
-    window->Title("Majokko");
-    window->AllowPlayerResizing(false);
+    window->SetTitle("Majokko");
+    window->SetAllowUserResizing(false);
 
     auto graphicsDevice = gameHost->GraphicsDevice();
     auto assets = gameHost->AssetManager();
@@ -55,17 +55,17 @@ void MajokkoGame::Initialize()
         }
     }
     {
-        renderer.AddProcessor(typeid(Details::Rendering::ParticleBatchCommand),
-            std::make_unique<ParticleBatchCommandProcessor>(graphicsContext, graphicsDevice));
+        renderer.AddProcessor(typeid(Detail::Rendering::ParticleBatchCommand),
+            std::make_unique<ParticleBatchCommandProcessor>(graphicsContext, graphicsDevice, *assets));
 
-        renderer.AddProcessor(typeid(Details::Rendering::PrimitiveCommand),
-            std::make_unique<PrimitiveCommandProcessor>(graphicsContext, graphicsDevice));
+        renderer.AddProcessor(typeid(Detail::Rendering::PrimitiveCommand),
+            std::make_unique<PrimitiveCommandProcessor>(graphicsContext, graphicsDevice, *assets));
 
-        renderer.AddProcessor(typeid(Details::Rendering::SkinnedMeshCommand),
-            std::make_unique<SkinnedMeshCommandProcessor>(graphicsDevice));
+        renderer.AddProcessor(typeid(Detail::Rendering::SkinnedMeshCommand),
+            std::make_unique<SkinnedMeshCommandProcessor>(graphicsDevice, *assets));
 
-        renderer.AddProcessor(typeid(Details::Rendering::SpriteCommand),
-            std::make_unique<SpriteCommandProcessor>(graphicsContext, graphicsDevice));
+        renderer.AddProcessor(typeid(Detail::Rendering::SpriteCommand),
+            std::make_unique<SpriteCommandProcessor>(graphicsContext, graphicsDevice, *assets));
     }
 }
 //-----------------------------------------------------------------------
@@ -76,7 +76,7 @@ void MajokkoGame::Update()
         auto animator = gameObject.Component<Animator>();
         POMDOG_ASSERT(animator);
 
-        animator->Update(gameTimer.FrameDuration());
+        animator->Update(gameTimer.GetFrameDuration());
     }
 
     for (auto & gameObject: gameWorld.QueryComponents<ParticleSystem>())
@@ -84,12 +84,12 @@ void MajokkoGame::Update()
         auto particleSystem = gameObject.Component<ParticleSystem>();
         POMDOG_ASSERT(particleSystem);
 
-        particleSystem->Simulate(gameObject, gameTimer.FrameDuration());
+        particleSystem->Simulate(gameObject, gameTimer.GetFrameDuration());
     }
 
     for (auto gameObject: gameWorld.QueryComponents<Actor>()) {
         auto actor = gameObject.Component<Actor>();
-        actor->Act(gameObject, gameTimer.FrameDuration());
+        actor->Act(gameObject, gameTimer.GetFrameDuration());
     }
 
     level->Update(*gameHost, gameWorld);
@@ -106,4 +106,4 @@ void MajokkoGame::Draw()
     graphicsContext->Present();
 }
 //-----------------------------------------------------------------------
-}// namespace Majokko
+} // namespace Majokko

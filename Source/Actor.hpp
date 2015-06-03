@@ -9,10 +9,6 @@
 #ifndef MAJOKKO_ACTOR_D4E2E9F6_469D_41C9_B4F8_1A1A8229F533_HPP
 #define MAJOKKO_ACTOR_D4E2E9F6_469D_41C9_B4F8_1A1A8229F533_HPP
 
-#if (_MSC_VER > 1000)
-#    pragma once
-#endif
-
 #include "Pomdog.Experimental/Experimental.hpp"
 #include <Pomdog/Pomdog.hpp>
 #include <vector>
@@ -64,6 +60,6 @@ private:
     std::vector<std::unique_ptr<Action>> actions;
 };
 
-}// namespace Majokko
+} // namespace Majokko
 
 #endif // !defined(MAJOKKO_ACTOR_D4E2E9F6_469D_41C9_B4F8_1A1A8229F533_HPP)

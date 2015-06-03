@@ -14,4 +14,4 @@ void HUDLayer::Draw(GraphicsContext & graphicsContext, Renderer & renderer)
 {
 }
 //-----------------------------------------------------------------------
-}// namespace Majokko
+} // namespace Majokko

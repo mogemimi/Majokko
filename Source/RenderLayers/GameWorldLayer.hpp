@@ -9,10 +9,6 @@
 #ifndef MAJOKKO_GAMEWORLDLAYER_E41D9D4C_6523_49BD_AB30_FC84E75C18E4_HPP
 #define MAJOKKO_GAMEWORLDLAYER_E41D9D4C_6523_49BD_AB30_FC84E75C18E4_HPP
 
-#if (_MSC_VER > 1000)
-#    pragma once
-#endif
-
 #include "Pomdog.Experimental/Compositing/RenderLayer.hpp"
 #include <Pomdog.Experimental/Experimental.hpp>
 #include <Pomdog/Pomdog.hpp>
@@ -57,13 +53,11 @@ private:
     VignetteEffect vignetteEffect;
 
     std::array<std::shared_ptr<RenderTarget2D>, 2> renderTargets;
-    std::shared_ptr<BlendState> blendStateNonPremultiplied;
-    std::shared_ptr<BlendState> blendStateAlphaBlend;
     GameObject cameraObject;
     Color color;
     PostProcessSettings postProcessSettings;
 };
 
-}// namespace Majokko
+} // namespace Majokko
 
 #endif // !defined(MAJOKKO_GAMEWORLDLAYER_E41D9D4C_6523_49BD_AB30_FC84E75C18E4_HPP)

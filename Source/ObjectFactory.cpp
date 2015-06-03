@@ -143,4 +143,4 @@ GameObject ObjectFactory::CreateBullet(GameWorld & gameWorld, AssetManager & ass
     return std::move(bullet);
 }
 //-----------------------------------------------------------------------
-}// namespace Majokko
+} // namespace Majokko

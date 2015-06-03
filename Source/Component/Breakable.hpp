@@ -9,10 +9,6 @@
 #ifndef MAJOKKO_BREAKABLE_D831B327_2D52_4885_BEDB_CB71DA271251_HPP
 #define MAJOKKO_BREAKABLE_D831B327_2D52_4885_BEDB_CB71DA271251_HPP
 
-#if (_MSC_VER > 1000)
-#    pragma once
-#endif
-
 #include "../BoundingCircle.hpp"
 #include <Pomdog.Experimental/Experimental.hpp>
 #include <Pomdog/Pomdog.hpp>
@@ -63,6 +59,6 @@ public:
 //Superboss
 //FinalBoss
 
-}// namespace Majokko
+} // namespace Majokko
 
 #endif // !defined(MAJOKKO_BREAKABLE_D831B327_2D52_4885_BEDB_CB71DA271251_HPP)

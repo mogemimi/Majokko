@@ -27,13 +27,13 @@ struct GameCommandStop {
 
 class PlayerCommandTranslator {
 public:
-    void Translate(DurationSeconds const& frameDuration, KeyboardState const& keyboardState, EventQueue & eventQueue);
+    void Translate(Duration const& frameDuration, KeyboardState const& keyboardState, EventQueue & eventQueue);
 
 private:
     //bool spaceKeyPressed = false;
 };
 
-void PlayerCommandTranslator::Translate(DurationSeconds const& frameDuration, KeyboardState const& keyboardState, EventQueue & eventQueue)
+void PlayerCommandTranslator::Translate(Duration const& frameDuration, KeyboardState const& keyboardState, EventQueue & eventQueue)
 {
     {
         Vector2 direction = Vector2::Zero;
@@ -135,18 +135,14 @@ MajokkoGameLevel::MajokkoGameLevel(GameHost & gameHost, Timer & gameTimerIn, Gam
         rectangle.RightTopColor(color1);
         rectangle.LeftBottomColor(color2);
         rectangle.RightBottomColor(color2);
-        auto bounds = gameHost.Window()->ClientBounds();
+        auto bounds = gameHost.Window()->GetClientBounds();
         rectangle.BoundingBox({0, 0, bounds.Width, bounds.Height});
         rectangle.DrawOrder = -1000.0f;
-
-        ///@todo badcode
-        auto depthStencilState = DepthStencilState::CreateNone(graphicsDevice);
-        gameHost.GraphicsContext()->SetDepthStencilState(depthStencilState);
     }
 //    {
 //        auto entity = gameWorld.CreateObject();
 //        entity.AddComponent<Transform2D>();
-//        auto particleClip = std::make_shared<ParticleClip>(Details::ParticleLoader::Load(*assets, "Particles/explosion_smoke.json"));
+//        auto particleClip = std::make_shared<ParticleClip>(Detail::ParticleLoader::Load(*assets, "Particles/explosion_smoke.json"));
 //        auto texture = assets->Load<Texture2D>("Particles/explosion_smoke.png");
 //        auto blendState = BlendState::CreateNonPremultiplied(graphicsDevice);
 //        auto & particleSystem = entity.AddComponent<ParticleSystem>(particleClip);
@@ -175,7 +171,7 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
         {
             auto transform = entity.Component<Transform2D>();
             auto movable = entity.Component<Movable>();
-            transform->Position += (movable->Velocity * gameTimer.FrameDuration().count());
+            transform->Position += (movable->Velocity * gameTimer.GetFrameDuration().count());
         }
     };
 
@@ -186,7 +182,7 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
             constexpr float speed = 900.0f;
             Vector2 direction{1.0f, 0.0f};
             auto transform = entity.Component<Transform2D>();
-            transform->Position += (direction * speed * gameTimer.FrameDuration().count());
+            transform->Position += (direction * speed * gameTimer.GetFrameDuration().count());
 
             if (transform->Position.X > 1000.0f) {
                 entity.Destroy();
@@ -207,8 +203,8 @@ void MajokkoGameLevel::Update(GameHost & gameHost, GameWorld & gameWorld)
 
     auto SpawnGhost = [&]
     {
-        constexpr DurationSeconds spawnInterval {0.7};
-        if (spawnTimer.TotalTime() >= spawnInterval)
+        constexpr Duration spawnInterval {0.7};
+        if (spawnTimer.GetTotalTime() >= spawnInterval)
         {
             auto graphicsDevice = gameHost.GraphicsDevice();
             auto assets = gameHost.AssetManager();
@@ -346,7 +342,7 @@ void MajokkoGameLevel::UpdatePlayerInput(GameHost & gameHost, GameWorld & gameWo
 
             constexpr float mass = 1.0f;
             movable->Thrust = (MaxThrust * normalizedDirection);
-            movable->Velocity += (mass * movable->Thrust * gameTimer.FrameDuration().count());
+            movable->Velocity += (mass * movable->Thrust * gameTimer.GetFrameDuration().count());
 
             if (movable->Velocity.LengthSquared() > MaxSpeed * MaxSpeed) {
                 movable->Thrust = Vector2::Zero;
@@ -360,9 +356,9 @@ void MajokkoGameLevel::UpdatePlayerInput(GameHost & gameHost, GameWorld & gameWo
             movable->Velocity = Vector2::Zero;
         }
         else if (args.Is<GameCommandShot>()) {
-            constexpr DurationSeconds castingTime = std::chrono::milliseconds(95);
+            constexpr Duration castingTime = std::chrono::milliseconds(95);
 
-            if (castingTimer.TotalTime() >= castingTime)
+            if (castingTimer.GetTotalTime() >= castingTime)
             {
                 auto assets = gameHost.AssetManager();
                 auto position = littleWitch.Component<Transform2D>()->Position + Vector2{50.0f, 30.0f};
@@ -402,9 +398,9 @@ void MajokkoGameLevel::UpdatePlayerInput(GameHost & gameHost, GameWorld & gameWo
     auto keyboardState = keyboard->GetState();
 
     static PlayerCommandTranslator translator;
-    translator.Translate(gameTimer.FrameDuration(), keyboardState, eventQueue);
+    translator.Translate(gameTimer.GetFrameDuration(), keyboardState, eventQueue);
 
-    eventQueue.Tick();
+    eventQueue.Emit();
 }
 //-----------------------------------------------------------------------
-}// namespace Majokko
+} // namespace Majokko

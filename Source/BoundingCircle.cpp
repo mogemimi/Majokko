@@ -9,6 +9,7 @@
 #include "BoundingCircle.hpp"
 
 namespace Majokko {
+namespace Unused {
 //-----------------------------------------------------------------------
 BoundingCircle::BoundingCircle(Vector2 const& center, float radius)
     : Center(center)
@@ -33,4 +34,5 @@ bool BoundingCircle::Intersects(BoundingCircle const& circle) const
     return (distance <= this->Radius + circle.Radius);
 }
 //-----------------------------------------------------------------------
-}// namespace Majokko
+} // namespace Unused
+} // namespace Majokko

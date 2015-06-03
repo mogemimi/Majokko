@@ -9,10 +9,6 @@
 #ifndef MAJOKKOGAME_HPP
 #define MAJOKKOGAME_HPP
 
-#if (_MSC_VER > 1000)
-#    pragma once
-#endif
-
 #include "Pomdog.Experimental/Experimental.hpp"
 #include <Pomdog/Pomdog.hpp>
 
@@ -42,6 +38,6 @@ private:
     Timer gameTimer;
 };
 
-}// namespace Majokko
+} // namespace Majokko
 
 #endif // !defined(MAJOKKOGAME_HPP)

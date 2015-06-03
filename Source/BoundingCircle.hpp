@@ -9,13 +9,10 @@
 #ifndef MAJOKKO_BOUNDINGCIRCLE_0460B25A_8A4A_4894_A3EF_36AE2C2CEE7F_HPP
 #define MAJOKKO_BOUNDINGCIRCLE_0460B25A_8A4A_4894_A3EF_36AE2C2CEE7F_HPP
 
-#if (_MSC_VER > 1000)
-#    pragma once
-#endif
-
 #include <Pomdog/Pomdog.hpp>
 
 namespace Majokko {
+namespace Unused {
 
 using namespace Pomdog;
 
@@ -41,6 +38,7 @@ public:
     bool Intersects(BoundingCircle const&) const;
 };
 
-}// namespace Majokko
+} // namespace Unused
+} // namespace Majokko
 
 #endif // !defined(MAJOKKO_BOUNDINGCIRCLE_0460B25A_8A4A_4894_A3EF_36AE2C2CEE7F_HPP)

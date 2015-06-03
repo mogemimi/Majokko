@@ -34,17 +34,17 @@ struct SandboxHelper {
 GameWorldLayer::GameWorldLayer(GameHost & gameHost, GameWorld & gameWorldIn)
     : gameWorld(gameWorldIn)
     , screenQuad(gameHost.GraphicsDevice())
-    , fxaa(gameHost.GraphicsDevice())
-    , grayscaleEffect(gameHost.GraphicsDevice())
-    , sepiaToneEffect(gameHost.GraphicsDevice())
-    , vignetteEffect(gameHost.GraphicsDevice())
+    , fxaa(gameHost.GraphicsDevice(), *gameHost.AssetManager())
+    , grayscaleEffect(gameHost.GraphicsDevice(), *gameHost.AssetManager())
+    , sepiaToneEffect(gameHost.GraphicsDevice(), *gameHost.AssetManager())
+    , vignetteEffect(gameHost.GraphicsDevice(), *gameHost.AssetManager())
     , color(Color::CornflowerBlue)
     , postProcessSettings{false, false, false, true}
 {
     auto graphicsDevice = gameHost.GraphicsDevice();
     auto window = gameHost.Window();
 
-    auto clientBounds = window->ClientBounds();
+    auto clientBounds = window->GetClientBounds();
 
     for (auto & renderTarget: renderTargets)
     {
@@ -57,9 +57,6 @@ GameWorldLayer::GameWorldLayer(GameHost & gameHost, GameWorld & gameWorldIn)
     vignetteEffect.SetViewport(clientBounds.Width, clientBounds.Height);
     sepiaToneEffect.SetViewport(clientBounds.Width, clientBounds.Height);
     grayscaleEffect.SetViewport(clientBounds.Width, clientBounds.Height);
-
-    blendStateNonPremultiplied = BlendState::CreateNonPremultiplied(graphicsDevice);
-    blendStateAlphaBlend = BlendState::CreateAlphaBlend(graphicsDevice);
 }
 //-----------------------------------------------------------------------
 //void GameWorldLayer::WindowSizeChanged(int width, int height)
@@ -139,11 +136,8 @@ void GameWorldLayer::Draw(GraphicsContext & graphicsContext, Renderer & renderer
         graphicsContext.SetRenderTarget(outRenderTarget);
     }
 
-    auto blendStateOld = graphicsContext.GetBlendState();
-
     {
         graphicsContext.Clear(Color::CornflowerBlue);
-        graphicsContext.SetBlendState(blendStateNonPremultiplied);
 
         POMDOG_ASSERT(cameraObject);
         auto camera = cameraObject.Component<Camera2D>();
@@ -154,8 +148,6 @@ void GameWorldLayer::Draw(GraphicsContext & graphicsContext, Renderer & renderer
 
         std::swap(inRenderTarget, outRenderTarget);
     }
-
-    graphicsContext.SetBlendState(blendStateAlphaBlend);
 
     size_t effectCount = 1;
     for (auto & applyPostEffect: postProcessEffects)
@@ -173,8 +165,6 @@ void GameWorldLayer::Draw(GraphicsContext & graphicsContext, Renderer & renderer
         std::swap(inRenderTarget, outRenderTarget);
         ++effectCount;
     }
-
-    graphicsContext.SetBlendState(blendStateOld);
 }
 //-----------------------------------------------------------------------
 void GameWorldLayer::DrawScene(GraphicsContext & graphicsContext, Renderer & renderer,
@@ -191,7 +181,7 @@ void GameWorldLayer::DrawScene(GraphicsContext & graphicsContext, Renderer & ren
 
     auto viewMatrix = SandboxHelper::CreateViewMatrix(transform, camera);
     auto projectionMatrix = Matrix4x4::CreateOrthographicLH(
-        viewport.Width(), viewport.Height(), camera.Near, camera.Far);
+        viewport.Width, viewport.Height, camera.Near, camera.Far);
 
     renderer.ViewMatrix(viewMatrix);
     renderer.ProjectionMatrix(projectionMatrix);
@@ -202,9 +192,9 @@ void GameWorldLayer::DrawScene(GraphicsContext & graphicsContext, Renderer & ren
         renderable->Visit(gameObject, renderer);
     }
 
-    graphicsContext.Viewport(viewport);
+    graphicsContext.SetViewport(viewport);
     renderer.Render(graphicsContext);
     renderer.Clear();
 }
 //-----------------------------------------------------------------------
-}// namespace Majokko
+} // namespace Majokko

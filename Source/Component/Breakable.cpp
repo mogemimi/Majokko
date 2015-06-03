@@ -27,4 +27,4 @@ void Breakable::Damage(float damage)
     TotalDamage += damage;
 }
 
-}// namespace Majokko
+} // namespace Majokko
