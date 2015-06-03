@@ -74,8 +74,6 @@
       'mac_bundle': 1,
       'sources': [
         'Source/Actor.hpp',
-        'Source/BoundingCircle.cpp',
-        'Source/BoundingCircle.hpp',
         'Source/MajokkoGame.cpp',
         'Source/MajokkoGame.hpp',
         'Source/MajokkoGameLevel.cpp',

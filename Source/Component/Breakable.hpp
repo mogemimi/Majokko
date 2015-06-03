@@ -9,7 +9,6 @@
 #ifndef MAJOKKO_BREAKABLE_D831B327_2D52_4885_BEDB_CB71DA271251_HPP
 #define MAJOKKO_BREAKABLE_D831B327_2D52_4885_BEDB_CB71DA271251_HPP
 
-#include "../BoundingCircle.hpp"
 #include <Pomdog.Experimental/Experimental.hpp>
 #include <Pomdog/Pomdog.hpp>
 

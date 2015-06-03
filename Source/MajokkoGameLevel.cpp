@@ -8,7 +8,6 @@
 
 #include "MajokkoGameLevel.hpp"
 #include "RenderLayers/GameWorldLayer.hpp"
-#include "BoundingCircle.hpp"
 #include "Breakable.hpp"
 #include "Actor.hpp"
 
