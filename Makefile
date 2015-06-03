@@ -5,4 +5,4 @@ clean:
 	@rm -rf ./build.xcodefiles
 
 utf-8:
-	@python pomdog/tools/source2utf8-with-signature.py Source/
+	@python pomdog/tools/refactor_sources.py Source/
